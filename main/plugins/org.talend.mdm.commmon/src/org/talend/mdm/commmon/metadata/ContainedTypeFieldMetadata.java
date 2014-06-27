@@ -1,22 +1,21 @@
 /*
  * Copyright (C) 2006-2014 Talend Inc. - www.talend.com
- * 
+ *
  * This source code is available under agreement available at
  * %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
- * 
- * You should have received a copy of the agreement along with this program; if not, write to Talend SA 9 rue Pages
- * 92150 Suresnes, France
+ *
+ * You should have received a copy of the agreement
+ * along with this program; if not, write to Talend SA
+ * 9 rue Pages 92150 Suresnes, France
  */
 
 package org.talend.mdm.commmon.metadata;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.talend.mdm.commmon.metadata.validation.CompositeValidationRule;
 import org.talend.mdm.commmon.metadata.validation.ValidationFactory;
 import org.talend.mdm.commmon.metadata.validation.ValidationRule;
+
+import java.util.*;
 
 /**
  *
@@ -30,7 +29,7 @@ public class ContainedTypeFieldMetadata extends MetadataExtensions implements Fi
     private final List<String> allowWriteUsers;
 
     private final List<String> hideUsers;
-
+    
     private final List<String> workflowAccessRights;
 
     private final boolean isMandatory;
@@ -45,8 +44,14 @@ public class ContainedTypeFieldMetadata extends MetadataExtensions implements Fi
 
     private int cachedHashCode;
 
-    public ContainedTypeFieldMetadata(ComplexTypeMetadata containingType, boolean isMany, boolean isMandatory, String name,
-            ComplexTypeMetadata fieldType, List<String> allowWriteUsers, List<String> hideUsers, List<String> workflowAccessRights) {
+    public ContainedTypeFieldMetadata(ComplexTypeMetadata containingType,
+            boolean isMany,
+            boolean isMandatory,
+            String name,
+            ComplexTypeMetadata fieldType,
+            List<String> allowWriteUsers,
+            List<String> hideUsers,
+            List<String> workflowAccessRights) {
         if (fieldType == null) {
             throw new IllegalArgumentException("Contained type cannot be null.");
         }
@@ -61,32 +66,26 @@ public class ContainedTypeFieldMetadata extends MetadataExtensions implements Fi
         this.workflowAccessRights = workflowAccessRights;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public boolean isKey() {
         return false;
     }
 
-    @Override
     public TypeMetadata getType() {
         return fieldType;
     }
 
-    @Override
     public ComplexTypeMetadata getContainingType() {
         return containingType;
     }
 
-    @Override
     public void setContainingType(ComplexTypeMetadata typeMetadata) {
         this.containingType = typeMetadata;
     }
 
-    @Override
     public FieldMetadata freeze() {
         if (isFrozen) {
             return this;
@@ -96,7 +95,6 @@ public class ContainedTypeFieldMetadata extends MetadataExtensions implements Fi
         return this;
     }
 
-    @Override
     public void promoteToKey() {
         throw new UnsupportedOperationException("Contained type field can't be promoted to key.");
     }
@@ -137,60 +135,61 @@ public class ContainedTypeFieldMetadata extends MetadataExtensions implements Fi
         return declaringType;
     }
 
-    @Override
     public void adopt(ComplexTypeMetadata metadata) {
         FieldMetadata copy = copy();
         copy.setContainingType(metadata);
         metadata.addField(copy);
     }
 
-    @Override
     public FieldMetadata copy() {
-        ContainedTypeFieldMetadata copy = new ContainedTypeFieldMetadata(containingType, isMany, isMandatory, name, fieldType,
-                allowWriteUsers, hideUsers, workflowAccessRights);
+        ContainedTypeFieldMetadata copy = new ContainedTypeFieldMetadata(containingType,
+                isMany,
+                isMandatory,
+                name,
+                fieldType,
+                allowWriteUsers,
+                hideUsers,
+                workflowAccessRights);
+        if (dataMap != null) {
+            copy.dataMap = new HashMap<String, Object>(dataMap);
+        }
         copy.declaringType = this.declaringType;
         return copy;
     }
 
-    @Override
     public List<String> getHideUsers() {
         return hideUsers;
     }
 
-    @Override
     public List<String> getWorkflowAccessRights() {
         return this.workflowAccessRights;
     }
 
-    @Override
     public List<String> getWriteUsers() {
         return allowWriteUsers;
     }
 
-    @Override
     public boolean isMany() {
         return isMany;
     }
 
-    @Override
     public boolean isMandatory() {
         return isMandatory;
     }
 
-    @Override
     public <T> T accept(MetadataVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
     @Override
     public String toString() {
-        return "Contained {" + //$NON-NLS-1$
-                "declaringType=" + declaringType + //$NON-NLS-1$
-                ", containingType=" + containingType + //$NON-NLS-1$
-                ", name='" + name + '\'' + //$NON-NLS-1$
-                ", isMany=" + isMany + //$NON-NLS-1$
+        return "Contained {" +  //$NON-NLS-1$
+                "declaringType=" + declaringType +   //$NON-NLS-1$
+                ", containingType=" + containingType +   //$NON-NLS-1$
+                ", name='" + name + '\'' +  //$NON-NLS-1$
+                ", isMany=" + isMany +  //$NON-NLS-1$
                 ", fieldTypeName='" + fieldType.getName() + '\'' + //$NON-NLS-1$
-                '}';
+                '}';   //$NON-NLS-1$
     }
 
     public ComplexTypeMetadata getContainedType() {
@@ -208,35 +207,19 @@ public class ContainedTypeFieldMetadata extends MetadataExtensions implements Fi
 
         ContainedTypeFieldMetadata that = (ContainedTypeFieldMetadata) o;
 
-        if (isMandatory != that.isMandatory) {
+        if (isMandatory != that.isMandatory) return false;
+        if (isMany != that.isMany) return false;
+        if (allowWriteUsers != null ? !allowWriteUsers.equals(that.allowWriteUsers) : that.allowWriteUsers != null)
             return false;
-        }
-        if (isMany != that.isMany) {
+        if (containingType != null ? !containingType.equals(that.containingType) : that.containingType != null)
             return false;
-        }
-        if (allowWriteUsers != null ? !allowWriteUsers.equals(that.allowWriteUsers) : that.allowWriteUsers != null) {
+        if (declaringType != null ? !declaringType.equals(that.declaringType) : that.declaringType != null)
             return false;
-        }
-        if (containingType != null ? !containingType.equals(that.containingType) : that.containingType != null) {
-            return false;
-        }
-        if (declaringType != null ? !declaringType.equals(that.declaringType) : that.declaringType != null) {
-            return false;
-        }
-        if (fieldType != null ? !fieldType.equals(that.fieldType) : that.fieldType != null) {
-            return false;
-        }
-        if (hideUsers != null ? !hideUsers.equals(that.hideUsers) : that.hideUsers != null) {
-            return false;
-        }
-        if (name != null ? !name.equals(that.name) : that.name != null) {
-            return false;
-        }
-        if (workflowAccessRights != null ? !workflowAccessRights.equals(that.workflowAccessRights)
-                : that.workflowAccessRights != null) {
-            return false;
-        }
-
+        if (fieldType != null ? !fieldType.equals(that.fieldType) : that.fieldType != null) return false;
+        if (hideUsers != null ? !hideUsers.equals(that.hideUsers) : that.hideUsers != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (workflowAccessRights != null ? !workflowAccessRights.equals(that.workflowAccessRights) : that.workflowAccessRights != null) return false;
+        
         return true;
     }
 

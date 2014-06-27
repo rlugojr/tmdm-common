@@ -1,23 +1,29 @@
 /*
  * Copyright (C) 2006-2014 Talend Inc. - www.talend.com
- *
+ * 
  * This source code is available under agreement available at
  * %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
- *
- * You should have received a copy of the agreement
- * along with this program; if not, write to Talend SA
- * 9 rue Pages 92150 Suresnes, France
+ * 
+ * You should have received a copy of the agreement along with this program; if not, write to Talend SA 9 rue Pages
+ * 92150 Suresnes, France
  */
 
 package org.talend.mdm.commmon.metadata.validation;
-
-import org.talend.mdm.commmon.metadata.*;
-import org.w3c.dom.Element;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.talend.mdm.commmon.metadata.*;
+import org.w3c.dom.Element;
+
+/**
+ * Performs validation checks on super types:
+ * <ul>
+ * <li>Type does not have multiple super types (multiple inheritance is not supported).</li>
+ * <li>Type does not add more key elements than its super type (sub types can't redefine inherited key).</li>
+ * </ul>
+ */
 class SuperTypeValidationRule implements ValidationRule {
 
     private final ComplexTypeMetadata type;
@@ -32,11 +38,10 @@ class SuperTypeValidationRule implements ValidationRule {
         if (!superTypes.isEmpty()) {
             // Multiple inheritance is not supported.
             if (superTypes.size() > 1) {
-                handler.error(type,
-                        "Multiple inheritance is not supported.",
-                        type.<Element>getData(MetadataRepository.XSD_DOM_ELEMENT),
-                        type.<Integer>getData(MetadataRepository.XSD_LINE_NUMBER),
-                        type.<Integer>getData(MetadataRepository.XSD_COLUMN_NUMBER),
+                handler.error(type, "Multiple inheritance is not supported.",
+                        type.<Element> getData(MetadataRepository.XSD_DOM_ELEMENT),
+                        type.<Integer> getData(MetadataRepository.XSD_LINE_NUMBER),
+                        type.<Integer> getData(MetadataRepository.XSD_COLUMN_NUMBER),
                         ValidationError.MULTIPLE_INHERITANCE_NOT_ALLOWED);
             }
             // Check for key override in sub types (not allowed).
@@ -47,11 +52,11 @@ class SuperTypeValidationRule implements ValidationRule {
                         Collection<FieldMetadata> thisTypeKeyFields = type.getKeyFields();
                         for (FieldMetadata thisTypeKeyField : thisTypeKeyFields) {
                             if (!((ComplexTypeMetadata) superType).hasField(thisTypeKeyField.getName())) {
-                                handler.error(superType, "Type '" + type.getName() + "' cannot add field(s) to its key because " +
-                                        "super type '" + superType.getName() + "' already defines key.",
-                                        type.<Element>getData(MetadataRepository.XSD_DOM_ELEMENT),
-                                        type.<Integer>getData(MetadataRepository.XSD_LINE_NUMBER),
-                                        type.<Integer>getData(MetadataRepository.XSD_COLUMN_NUMBER),
+                                handler.error(superType, "Type '" + type.getName() + "' cannot add field(s) to its key because "
+                                        + "super type '" + superType.getName() + "' already defines key.",
+                                        type.<Element> getData(MetadataRepository.XSD_DOM_ELEMENT),
+                                        type.<Integer> getData(MetadataRepository.XSD_LINE_NUMBER),
+                                        type.<Integer> getData(MetadataRepository.XSD_COLUMN_NUMBER),
                                         ValidationError.TYPE_CANNOT_OVERRIDE_SUPER_TYPE_KEY);
                                 return false;
                             }
