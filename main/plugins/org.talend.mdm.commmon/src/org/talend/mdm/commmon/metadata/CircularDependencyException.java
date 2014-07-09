@@ -21,8 +21,12 @@ public class CircularDependencyException extends RuntimeException {
 
     private final Map<ComplexTypeMetadata, List<FieldMetadata>> cycleHints;
 
-    public CircularDependencyException(Map<ComplexTypeMetadata, List<FieldMetadata>> cycleHints) {
+    private final List<List<ComplexTypeMetadata>> cycleTypes;
+
+    public CircularDependencyException(Map<ComplexTypeMetadata, List<FieldMetadata>> cycleHints,
+            List<List<ComplexTypeMetadata>> cycleTypes) {
         this.cycleHints = cycleHints;
+        this.cycleTypes = cycleTypes;
     }
 
     /**
@@ -32,6 +36,10 @@ public class CircularDependencyException extends RuntimeException {
      */
     public Map<ComplexTypeMetadata, List<FieldMetadata>> getCycleHints() {
         return cycleHints;
+    }
+
+    public List<List<ComplexTypeMetadata>> getCycleTypes() {
+        return cycleTypes;
     }
 
     @Override

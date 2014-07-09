@@ -179,7 +179,7 @@ public class MetadataUtils {
      * @throws org.talend.mdm.commmon.metadata.CircularDependencyException If repository contains types that creates a
      * cyclic dependency. Error message contains information on where the cycle is.
      */
-    public static List<ComplexTypeMetadata> sortTypes(MetadataRepository repository) {
+    public static List<ComplexTypeMetadata> sortTypes(MetadataRepository repository) throws CircularDependencyException {
         return sortTypes(repository, SortType.STRICT);
     }
     
@@ -204,7 +204,8 @@ public class MetadataUtils {
      * @throws org.talend.mdm.commmon.metadata.CircularDependencyException If repository contains types that creates a
      * cyclic dependency. Error message contains information on where the cycle is.
      */
-    public static List<ComplexTypeMetadata> sortTypes(MetadataRepository repository, SortType sortType) {
+    public static List<ComplexTypeMetadata> sortTypes(MetadataRepository repository, SortType sortType)
+            throws CircularDependencyException {
         List<ComplexTypeMetadata> types = new ArrayList<ComplexTypeMetadata>(repository.getUserComplexTypes());
         return _sortTypes(repository, types, sortType);
     }
@@ -239,13 +240,14 @@ public class MetadataUtils {
      * @throws org.talend.mdm.commmon.metadata.CircularDependencyException If repository contains types that creates a
      * cyclic dependency. Error message contains information on where the cycle is.
      */
-    public static List<ComplexTypeMetadata> sortTypes(MetadataRepository repository, List<ComplexTypeMetadata> types) {
+    public static List<ComplexTypeMetadata> sortTypes(MetadataRepository repository, List<ComplexTypeMetadata> types)
+            throws CircularDependencyException {
         return _sortTypes(repository, types, SortType.STRICT);
     }
 
     // Internal method for type sort
     private static List<ComplexTypeMetadata> _sortTypes(MetadataRepository repository, List<ComplexTypeMetadata> typesSubSet,
-            final SortType sortType) {
+            final SortType sortType) throws CircularDependencyException {
         /*
          * Compute additional data for topological sorting
          */
@@ -463,7 +465,7 @@ public class MetadataUtils {
                             previous = currentType;
                         }
                     }
-                    throw new CircularDependencyException(cycleHints);
+                    throw new CircularDependencyException(cycleHints, cycles);
                 }
             case LENIENT:
                 for (List<ComplexTypeMetadata> cycle : cycles) {
