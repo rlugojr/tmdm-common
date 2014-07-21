@@ -342,17 +342,20 @@ public class MetadataUtils {
                 }
 
                 private boolean include(FieldMetadata field) {
+                    if (field == null) {
+                        return false;
+                    }
+                    ComplexTypeMetadata containingType = field.getContainingType();
+                    FieldMetadata containerField = containingType.getContainer();
                     switch (sortType) {
                     case STRICT:
-                        ComplexTypeMetadata containingType = field.getContainingType();
-                        FieldMetadata containerField = containingType.getContainer();
                         if (containerField != null) {
                             return include(containerField) && field.isMandatory();
                         } else {
                             return field.isMandatory();
                         }
                     case LENIENT:
-                        return true;
+                        return include(containerField);
                     default:
                         throw new NotImplementedException("Sort '" + sortType + "' is not implemented.");
                     }
@@ -469,7 +472,12 @@ public class MetadataUtils {
                 }
             case LENIENT:
                 for (List<ComplexTypeMetadata> cycle : cycles) {
-                    sortedTypes.addAll(cycle);
+                    cycle.remove(cycle.size() - 1);
+                    for (ComplexTypeMetadata cycleElement : cycle) {
+                        if (!sortedTypes.contains(cycleElement)) {
+                            sortedTypes.add(cycleElement);
+                        }
+                    }
                 }
                 break;
             default:
@@ -564,8 +572,6 @@ public class MetadataUtils {
                 } else if(!type.equals(entity)) {
                     // In case the non instance type is used in an entity.
                     usageCount += countEntityUsageCount(entity);
-                } else if (type.equals(entity)) {
-                    return 0; // entity is not instantiable, thus no entity here.
                 }
             } else {
                 usageCount++;
