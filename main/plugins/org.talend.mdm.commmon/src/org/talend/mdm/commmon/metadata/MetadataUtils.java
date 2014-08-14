@@ -331,9 +331,12 @@ public class MetadataUtils {
                         if (referencedType.isInstantiable()) {
                             if (types.contains(referencedType)) {
                                 lineContent[getId(referencedType, types)]++;
-                                // Implicitly include reference to sub types of referenced type.
-                                for (ComplexTypeMetadata subType : referencedType.getSubTypes()) {
-                                    lineContent[getId(subType, types)]++;
+                                if (sortType == SortType.LENIENT) {
+                                    // Implicitly include reference to sub types of referenced type for LENIENT sort (STRICT should
+                                    // take in account sub types to exclude false cyclic dependencies).
+                                    for (ComplexTypeMetadata subType : referencedType.getSubTypes()) {
+                                        lineContent[getId(subType, types)]++;
+                                    }
                                 }
                             }
                         }

@@ -30,6 +30,7 @@ public class ReferenceFieldMetadata extends MetadataExtensions implements FieldM
     private final List<String> writeUsers;
     
     private final List<String> workflowAccessRights;
+    private final String foreignKeyFilter;
 
     private final boolean isMandatory;
 
@@ -68,7 +69,8 @@ public class ReferenceFieldMetadata extends MetadataExtensions implements FieldM
                                   TypeMetadata fieldType,
                                   List<String> allowWriteUsers,
                                   List<String> hideUsers,
-                                  List<String> workflowAccessRights) {
+                                  List<String> workflowAccessRights,
+                                  String foreignKeyFilter) {
         this.isMandatory = isMandatory;
         this.name = name;
         this.referencedField = referencedField;
@@ -85,6 +87,11 @@ public class ReferenceFieldMetadata extends MetadataExtensions implements FieldM
         this.writeUsers = allowWriteUsers;
         this.hideUsers = hideUsers;
         this.workflowAccessRights = workflowAccessRights;
+        this.foreignKeyFilter = foreignKeyFilter;
+    }
+
+    public String getForeignKeyFilter() {
+        return foreignKeyFilter;
     }
 
     public FieldMetadata getReferencedField() {
@@ -240,7 +247,8 @@ public class ReferenceFieldMetadata extends MetadataExtensions implements FieldM
                 fieldType,
                 writeUsers,
                 hideUsers,
-                workflowAccessRights);
+                workflowAccessRights,
+                foreignKeyFilter);
         copy.localeToLabel.putAll(localeToLabel);
         if (dataMap != null) {
             copy.dataMap = new HashMap<String, Object>(dataMap);

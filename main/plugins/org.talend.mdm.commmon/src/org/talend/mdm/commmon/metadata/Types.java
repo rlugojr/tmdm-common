@@ -11,11 +11,19 @@
 
 package org.talend.mdm.commmon.metadata;
 
+import java.util.UUID;
+
 /**
+ * Constants for all Xml Schema simple types supported in MDM.
  *
+ * @see #NUMBERS
+ * @see #DATES
  */
 public interface Types {
-    String[] NUMBERS = new String[]{Types.INT,
+    /**
+     * Convenience constants for all number types.
+     */
+    String[] NUMBERS = new String[] { Types.INT,
             Types.UNSIGNED_INT,
             Types.INTEGER,
             Types.NEGATIVE_INTEGER,
@@ -31,47 +39,54 @@ public interface Types {
             Types.UNSIGNED_LONG,
             Types.SHORT,
             Types.UNSIGNED_SHORT,
-            Types.FLOAT};
+            Types.FLOAT };
 
-    String[] DATES = new String[]{Types.DATE,
-                Types.DATETIME,
-                Types.TIME};
+    /**
+     * Convenience constant for all date types.
+     */
+    String[] DATES = new String[] { Types.DATE,
+            Types.DATETIME,
+            Types.TIME };
 
-    String LONG = "long"; //$NON-NLS-1$
-    String DECIMAL = "decimal"; //$NON-NLS-1$
-    String BOOLEAN = "boolean"; //$NON-NLS-1$
-    String BYTE = "byte"; //$NON-NLS-1$
-    String DATE = "date"; //$NON-NLS-1$
-    String DATETIME = "dateTime"; //$NON-NLS-1$
-    String DOUBLE = "double"; //$NON-NLS-1$
-    String FLOAT = "float"; //$NON-NLS-1$
-    String INTEGER = "integer"; //$NON-NLS-1$
-    String INT = "int"; //$NON-NLS-1$
-    String SHORT = "short"; //$NON-NLS-1$
-    String STRING = "string"; //$NON-NLS-1$
-    String POSITIVE_INTEGER = "positiveInteger"; //$NON-NLS-1$
-    String NEGATIVE_INTEGER = "negativeInteger"; //$NON-NLS-1$
+    String LONG                 = "long"; //$NON-NLS-1$
+    String DECIMAL              = "decimal"; //$NON-NLS-1$
+    String BOOLEAN              = "boolean"; //$NON-NLS-1$
+    String BYTE                 = "byte"; //$NON-NLS-1$
+    String DATE                 = "date"; //$NON-NLS-1$
+    String DATETIME             = "dateTime"; //$NON-NLS-1$
+    String DOUBLE               = "double"; //$NON-NLS-1$
+    String FLOAT                = "float"; //$NON-NLS-1$
+    String INTEGER              = "integer"; //$NON-NLS-1$
+    String INT                  = "int"; //$NON-NLS-1$
+    String SHORT                = "short"; //$NON-NLS-1$
+    String STRING               = "string"; //$NON-NLS-1$
+    String POSITIVE_INTEGER     = "positiveInteger"; //$NON-NLS-1$
+    String NEGATIVE_INTEGER     = "negativeInteger"; //$NON-NLS-1$
     String NON_POSITIVE_INTEGER = "nonPositiveInteger"; //$NON-NLS-1$
     String NON_NEGATIVE_INTEGER = "nonNegativeInteger"; //$NON-NLS-1$
-    String UNSIGNED_INT = "unsignedInt"; //$NON-NLS-1$
-    String HEX_BINARY = "hexBinary"; //$NON-NLS-1$
-    String BASE64_BINARY = "base64Binary"; //$NON-NLS-1$
-    String ANY_URI = "anyURI"; //$NON-NLS-1$
-    String QNAME = "QName"; //$NON-NLS-1$
-    String TIME = "time"; //$NON-NLS-1$
-    String DURATION = "duration"; //$NON-NLS-1$
-    String UNSIGNED_SHORT = "unsignedShort"; //$NON-NLS-1$
-    String UNSIGNED_BYTE = "unsignedByte"; //$NON-NLS-1$
-    String UNSIGNED_LONG = "unsignedLong"; //$NON-NLS-1$
-    String UNSIGNED_DOUBLE = "unsignedDouble"; //$NON-NLS-1$
-    String MULTI_LINGUAL = "MULTI_LINGUAL"; //$NON-NLS-1$
-    String UUID = "UUID"; //$NON-NLS-1$
-    String G_YEAR_MONTH = "gYearMonth"; //$NON-NLS-1$
-    String G_YEAR = "gYear"; //$NON-NLS-1$
-    String G_MONTH_DAY = "gMonthDay"; //$NON-NLS-1$
-    String G_DAY = "gDay"; //$NON-NLS-1$
-    String G_MONTH = "gMonth"; //$NON-NLS-1$
-    String ANY_TYPE = "anyType"; //$NON-NLS-1$
-    String ANY_SIMPLE_TYPE = "anySimpleType"; //$NON-NLS-1$
-    String TOKEN = "token"; //$NON-NLS-1$
+    String UNSIGNED_INT         = "unsignedInt"; //$NON-NLS-1$
+    String HEX_BINARY           = "hexBinary"; //$NON-NLS-1$
+    String BASE64_BINARY        = "base64Binary"; //$NON-NLS-1$
+    String ANY_URI              = "anyURI"; //$NON-NLS-1$
+    String QNAME                = "QName"; //$NON-NLS-1$
+    String TIME                 = "time"; //$NON-NLS-1$
+    String DURATION             = "duration"; //$NON-NLS-1$
+    String UNSIGNED_SHORT       = "unsignedShort"; //$NON-NLS-1$
+    String UNSIGNED_BYTE        = "unsignedByte"; //$NON-NLS-1$
+    String UNSIGNED_LONG        = "unsignedLong"; //$NON-NLS-1$
+    String UNSIGNED_DOUBLE      = "unsignedDouble"; //$NON-NLS-1$
+    String MULTI_LINGUAL        = "MULTI_LINGUAL"; //$NON-NLS-1$
+    String UUID                 = "UUID"; //$NON-NLS-1$
+    String G_YEAR_MONTH         = "gYearMonth"; //$NON-NLS-1$
+    String G_YEAR               = "gYear"; //$NON-NLS-1$
+    String G_MONTH_DAY          = "gMonthDay"; //$NON-NLS-1$
+    String G_DAY                = "gDay"; //$NON-NLS-1$
+    String G_MONTH              = "gMonth"; //$NON-NLS-1$
+    String ANY_TYPE             = "anyType"; //$NON-NLS-1$
+    String ANY_SIMPLE_TYPE      = "anySimpleType"; //$NON-NLS-1$
+    String TOKEN                = "token"; //$NON-NLS-1$
+    /**
+     * Length of a field to contain a {@link #UUID} value.
+     */
+    int UUID_LENGTH = java.util.UUID.randomUUID().toString().length() + 10;
 }

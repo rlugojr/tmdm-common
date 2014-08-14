@@ -137,15 +137,24 @@ public class ComplexTypeMetadataImpl extends MetadataExtensions implements Compl
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("Field name can not be null nor empty.");
         }
+        FieldMetadata foundField;
         if (path.indexOf('/') < 0) {
-            return fieldMetadata.get(path); // Shortcut for direct look up for a field (no path involved).
-        } else {
-            FieldMetadata foundField = _getField(this, path);
+            foundField = fieldMetadata.get(path); // Shortcut for direct look up for a field (no path involved).
             if (foundField == null) {
-                throw new IllegalArgumentException("Type '" + getName() + "' does not own field '" + path + "'.");
+                for (TypeMetadata superType : superTypes) {
+                    foundField = ((ComplexTypeMetadata) superType).getField(path);
+                    if (foundField != null) {
+                        break;
+                    }
+                }
             }
-            return foundField;
+        } else {
+            foundField = _getField(this, path);
         }
+        if (foundField == null) {
+            throw new IllegalArgumentException("Type '" + getName() + "' does not own field '" + path + "'.");
+        }
+        return foundField;
     }
     
     private static FieldMetadata _getField(ComplexTypeMetadata type, String path) {

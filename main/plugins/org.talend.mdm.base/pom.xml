@@ -15,7 +15,13 @@
     </organization>
 
     <properties>
+        <!-- GWT and other dependent libraries must be aligned in term of version -->
         <gwt.version>2.4.0</gwt.version>
+        <gwt.restlet.version>2.2.1</gwt.restlet.version>
+        <gwt.flot.version>3.2.0</gwt.flot.version>
+        <gwt.log.version>3.1.8</gwt.log.version>
+        <gwt.gxt.version>2.2.5-gwt22</gwt.gxt.version>
+        
         <powermock.version>1.4.12</powermock.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -1037,6 +1043,48 @@
                 <version>9.1-902.jdbc4</version>
                 <scope>runtime</scope>
             </dependency>
+            <dependency>
+                <groupId>org.restlet.gwt</groupId>
+                <artifactId>org.restlet</artifactId>
+                <version>${gwt.restlet.version}-TalendPatch</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.restlet.gwt</groupId>
+                <artifactId>org.restlet.ext.json</artifactId>
+                <version>${gwt.restlet.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.restlet.gwt</groupId>
+                <artifactId>org.restlet.ext.xml</artifactId>
+                <version>${gwt.restlet.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.gflot</groupId>
+                <artifactId>gflot</artifactId>
+                <version>${gwt.flot.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.allen-sauer.gwt.log</groupId>
+                <artifactId>gwt-log</artifactId>
+                <version>${gwt.log.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.extjs</groupId>
+                <artifactId>gxt</artifactId>
+                <version>${gwt.gxt.version}</version>
+            </dependency>
+            
 
             <!-- 3rd party dependencies (see deploy-jboss-other-libs execution) -->
             <dependency>
@@ -1138,25 +1186,6 @@
             </dependency>
 
             <!-- 3rd party dependencies (shared, see talend.mdm.libraries/deploy/lib ) -->
-            <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-servlet</artifactId>
-                <version>${gwt.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.allen-sauer.gwt.log</groupId>
-                <artifactId>gwt-log</artifactId>
-                <version>3.1.8</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.extjs</groupId>
-                <artifactId>gxt</artifactId>
-                <version>2.2.5</version>
-                <scope>system</scope>
-                <systemPath>${tom.location}/talend.mdm.libraries/deploy/lib/gxt-2.2.5-gwt22.jar</systemPath>
-            </dependency>
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -1357,26 +1386,6 @@
                 <version>1.3.0</version>
                 <scope>system</scope>
                 <systemPath>${tom.location}/talend.mdm.libraries/deploy/lib/z.svnkit.jar</systemPath>
-            </dependency>
-            <dependency>
-	            <groupId>org.restlet.gwt</groupId>
-	            <artifactId>org.restlet</artifactId>
-	            <version>2.0.14</version>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.restlet.gwt</groupId>
-	            <artifactId>org.restlet.ext.json</artifactId>
-	            <version>2.0.14</version>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.restlet.gwt</groupId>
-	            <artifactId>org.restlet.ext.xml</artifactId>
-	            <version>2.0.14</version>
-	        </dependency>
-	        <dependency>
-                <groupId>com.googlecode.gflot</groupId>
-                <artifactId>gflot</artifactId>
-                <version>3.2.0</version>
             </dependency>
 
             <!-- container dependencies -->

@@ -29,6 +29,8 @@ public class ForeignKeyProcessor implements XmlSchemaAnnotationProcessor {
                 String source = appInfo.getAttribute("source"); //$NON-NLS-1$
                 if ("X_ForeignKey".equals(source)) { //$NON-NLS-1$
                     handleForeignKey(repository, type, state, appInfo);
+                } else if("X_ForeignKey_Filter".equals(source)) { //$NON-NLS-1$
+                    state.setForeignKeyFilter(appInfo.getTextContent());
                 }
             }
             // Then proceed to other FK related annotations

@@ -56,6 +56,8 @@ public class XmlSchemaAnnotationProcessorState {
 
     private final List<String> workflowAccessRights = new LinkedList<String>();
 
+    private String foreignKeyFilter = StringUtils.EMPTY;
+
     public void setFkIntegrity(boolean fkIntegrity) {
         this.fkIntegrity = fkIntegrity;
     }
@@ -166,5 +168,13 @@ public class XmlSchemaAnnotationProcessorState {
 
     public Map<Locale, String> getLocaleToLabel() {
         return localeToLabel;
+    }
+
+    public void setForeignKeyFilter(String foreignKeyFilter) {
+        this.foreignKeyFilter = foreignKeyFilter;
+    }
+
+    public String getForeignKeyFilter() {
+        return foreignKeyFilter;
     }
 }

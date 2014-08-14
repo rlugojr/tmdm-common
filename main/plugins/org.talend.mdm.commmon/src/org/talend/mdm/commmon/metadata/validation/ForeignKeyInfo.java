@@ -10,6 +10,7 @@
 
 package org.talend.mdm.commmon.metadata.validation;
 
+import org.apache.commons.lang.StringUtils;
 import org.talend.mdm.commmon.metadata.*;
 import org.w3c.dom.Element;
 
@@ -33,7 +34,16 @@ class ForeignKeyInfo implements ValidationRule {
     public boolean perform(ValidationHandler handler) {
         // Foreign key info checks
         for (FieldMetadata foreignKeyInfo : field.getForeignKeyInfoFields()) {
-            if (!ValidationFactory.getRule(foreignKeyInfo).perform(handler)) {
+            if(StringUtils.isNotEmpty(field.getForeignKeyFilter())) {
+                boolean isValidForeignKeyInfo = ValidationFactory.getRule(foreignKeyInfo).perform(NoOpValidationHandler.INSTANCE);
+                if(!isValidForeignKeyInfo) {
+                    handler.warning(foreignKeyInfo, "Foreign key info is invalid (but foreign key filter may make it valid).",
+                            foreignKeyInfo.<Element>getData(MetadataRepository.XSD_DOM_ELEMENT),
+                            foreignKeyInfo.<Integer>getData(MetadataRepository.XSD_LINE_NUMBER),
+                            foreignKeyInfo.<Integer>getData(MetadataRepository.XSD_COLUMN_NUMBER),
+                            ValidationError.FOREIGN_KEY_INFO_INVALID);
+                }
+            } else if (!ValidationFactory.getRule(foreignKeyInfo).perform(handler)) {
                 continue;
             }
             if (!MetadataUtils.isPrimitiveTypeField(foreignKeyInfo)) {
