@@ -194,7 +194,7 @@ public class ReferenceFieldMetadata extends MetadataExtensions implements FieldM
     }
 
     public TypeMetadata getDeclaringType() {
-        return containingType;
+        return declaringType;
     }
 
     public boolean isFKIntegrity() {

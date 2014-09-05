@@ -50,6 +50,7 @@ public class ValidationFactory {
 
     public static ValidationRule getRule(ReferenceFieldMetadata field) {
         List<ValidationRule> rules = new LinkedList<ValidationRule>();
+        rules.add(new FieldInheritanceOverrideRule(field)); // All fields common rule
         rules.add(new FieldTypeValidationRule(field)); // All fields common rule
         rules.add(new ForeignKeyExist(field));
         rules.add(new ForeignKeyMaxLength(field));
@@ -62,7 +63,10 @@ public class ValidationFactory {
     }
 
     public static ValidationRule getRule(SimpleTypeFieldMetadata field) {
-        return new FieldTypeValidationRule(field);
+        List<ValidationRule> rules = new LinkedList<ValidationRule>();
+        rules.add(new FieldInheritanceOverrideRule(field));
+        rules.add(new FieldTypeValidationRule(field));
+        return new CompositeValidationRule(rules.toArray(new ValidationRule[rules.size()]));
     }
 
     public static ValidationRule getRule(SoftIdFieldRef field) {
@@ -74,11 +78,17 @@ public class ValidationFactory {
     }
 
     public static ValidationRule getRule(ContainedTypeFieldMetadata field) {
-        return new FieldTypeValidationRule(field);
+        List<ValidationRule> rules = new LinkedList<ValidationRule>();
+        rules.add(new FieldInheritanceOverrideRule(field));
+        rules.add(new FieldTypeValidationRule(field));
+        return new CompositeValidationRule(rules.toArray(new ValidationRule[rules.size()]));
     }
 
     public static ValidationRule getRule(EnumerationFieldMetadata field) {
-        return new FieldTypeValidationRule(field);
+        List<ValidationRule> rules = new LinkedList<ValidationRule>();
+        rules.add(new FieldInheritanceOverrideRule(field));
+        rules.add(new FieldTypeValidationRule(field));
+        return new CompositeValidationRule(rules.toArray(new ValidationRule[rules.size()]));
     }
 
     public static ValidationRule getRule(TypeMetadata type) {

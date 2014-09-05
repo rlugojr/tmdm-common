@@ -225,7 +225,11 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
     }
 
     public void load(InputStream inputStream) {
-        load(inputStream, new DefaultValidationHandler());
+        load(inputStream, getValidationHandler());
+    }
+
+    protected ValidationHandler getValidationHandler() {
+        return new DefaultValidationHandler();
     }
 
     public void load(InputStream inputStream, ValidationHandler handler) {
