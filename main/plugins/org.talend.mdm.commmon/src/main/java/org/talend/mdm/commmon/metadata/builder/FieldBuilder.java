@@ -1,21 +1,20 @@
 package org.talend.mdm.commmon.metadata.builder;
 
+import com.google.common.base.Predicate;
+import org.talend.mdm.commmon.metadata.ComplexTypeMetadata;
+import org.talend.mdm.commmon.metadata.FieldMetadata;
+import org.talend.mdm.commmon.metadata.MetadataExtensible;
+
+import javax.xml.XMLConstants;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.xml.XMLConstants;
-
-import org.talend.mdm.commmon.metadata.ComplexTypeMetadata;
-import org.talend.mdm.commmon.metadata.FieldMetadata;
-
-import com.google.common.base.Predicate;
-
 /**
  *
  */
-public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata> {
+public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata>, MetadataExtensible {
 
     protected String name;
 
@@ -38,6 +37,12 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata> {
     public FieldBuilder() {
     }
 
+    public static SimpleFieldBuilder field(String name) {
+        SimpleFieldBuilder builder = new SimpleFieldBuilder();
+        builder.name = name;
+        return builder;
+    }
+
     public static SimpleFieldBuilder field(String name, String simpleTypeName) {
         SimpleFieldBuilder builder = new SimpleFieldBuilder();
         builder.name = name;
@@ -54,6 +59,11 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata> {
 
     public FieldBuilder name(String name, Locale locale) {
         fieldNameLocale.put(locale, name);
+        return this;
+    }
+
+    public FieldBuilder as(TypeBuilder type) {
+        fieldType = type;
         return this;
     }
 
@@ -85,4 +95,13 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata> {
         return this;
     }
 
+    @Override
+    public void setData(String key, Object data) {
+
+    }
+
+    @Override
+    public <X> X getData(String key) {
+        return null;
+    }
 }

@@ -1,18 +1,16 @@
 package org.talend.mdm.commmon.metadata.builder;
 
 import org.apache.commons.lang.StringUtils;
-import org.talend.mdm.commmon.metadata.ComplexTypeMetadata;
-import org.talend.mdm.commmon.metadata.ComplexTypeMetadataImpl;
-import org.talend.mdm.commmon.metadata.MetadataRepository;
-import org.talend.mdm.commmon.metadata.TypeMetadata;
+import org.talend.mdm.commmon.metadata.*;
+import org.talend.mdm.commmon.util.core.ICoreConstants;
 
 import javax.xml.XMLConstants;
-import java.util.Collections;
+import java.util.*;
 
 /**
  *
  */
-public class TypeBuilder extends Loop<ComplexTypeMetadata> {
+public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataExtensible {
 
     private static final MetadataRepository SIMPLE_TYPE_REPOSITORY = new MetadataRepository();
 
@@ -23,6 +21,11 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> {
     private final String name;
 
     private ComplexTypeMetadata type;
+
+    private final Map<String, Object> data = new HashMap<String, Object>();
+
+    // If write is not allowed for everyone, at least add "administration".
+    private List<String> writeRoles = Collections.singletonList(ICoreConstants.ADMIN_PERMISSION);
 
     private TypeBuilder(String namespace, String name) {
         this.namespace = namespace;
@@ -41,6 +44,14 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> {
         return type(StringUtils.EMPTY, MetadataRepository.ANONYMOUS_PREFIX + anonymousCounter++);
     }
 
+    public TypeBuilder write(String role) {
+        writeRoles = new LinkedList<String>();
+        if(!writeRoles.contains(role)) {
+            writeRoles.add(role);
+        }
+        return this;
+    }
+
     public TypeBuilder with(FieldBuilder... fieldBuilders) {
         Collections.addAll(predicates, fieldBuilders);
         return this;
@@ -56,8 +67,31 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> {
         }
     }
 
+    public TypeBuilder name(Locale locale, String name) {
+        // TODO
+        return this;
+    }
+
     @Override
     protected ComplexTypeMetadata getInput() {
         return type;
+    }
+
+    @Override
+    public void setData(String key, Object data) {
+        this.data.put(key, data);
+    }
+
+    @Override
+    public <X> X getData(String key) {
+        return (X) data.get(key);
+    }
+
+    public TypeBuilder inherits(TypeBuilder type) {
+        return this;
+    }
+
+    public TypeBuilder maxLength(String maxLength) {
+        return null;
     }
 }

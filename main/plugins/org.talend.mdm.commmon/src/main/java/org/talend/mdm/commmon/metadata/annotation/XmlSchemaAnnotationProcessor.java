@@ -14,6 +14,8 @@ package org.talend.mdm.commmon.metadata.annotation;
 import org.eclipse.xsd.XSDAnnotation;
 import org.talend.mdm.commmon.metadata.ComplexTypeMetadata;
 import org.talend.mdm.commmon.metadata.MetadataRepository;
+import org.talend.mdm.commmon.metadata.builder.FieldBuilder;
+import org.talend.mdm.commmon.metadata.builder.TypeBuilder;
 
 /**
  * Enrich a {@link ComplexTypeMetadata} being built with information contained in XML Schema information.
@@ -31,4 +33,8 @@ public interface XmlSchemaAnnotationProcessor {
      *                   {@link org.talend.mdm.commmon.metadata.annotation.XmlSchemaAnnotationProcessor}.
      */
     void process(MetadataRepository repository, ComplexTypeMetadata type, XSDAnnotation annotation, XmlSchemaAnnotationProcessorState state);
+
+    void process(XSDAnnotation annotation, TypeBuilder typeBuilder);
+
+    void process(XSDAnnotation annotation, FieldBuilder typeBuilder);
 }

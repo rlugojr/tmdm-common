@@ -15,35 +15,23 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xsd.XSDAnnotation;
-import org.eclipse.xsd.XSDComplexTypeContent;
-import org.eclipse.xsd.XSDComplexTypeDefinition;
-import org.eclipse.xsd.XSDConstrainingFacet;
-import org.eclipse.xsd.XSDDiagnostic;
-import org.eclipse.xsd.XSDDiagnosticSeverity;
-import org.eclipse.xsd.XSDElementDeclaration;
-import org.eclipse.xsd.XSDEnumerationFacet;
-import org.eclipse.xsd.XSDIdentityConstraintDefinition;
-import org.eclipse.xsd.XSDLengthFacet;
-import org.eclipse.xsd.XSDMaxLengthFacet;
-import org.eclipse.xsd.XSDModelGroup;
-import org.eclipse.xsd.XSDParticle;
-import org.eclipse.xsd.XSDParticleContent;
-import org.eclipse.xsd.XSDSchema;
-import org.eclipse.xsd.XSDSimpleTypeDefinition;
-import org.eclipse.xsd.XSDTypeDefinition;
-import org.eclipse.xsd.XSDXPathDefinition;
+import org.eclipse.xsd.*;
 import org.eclipse.xsd.util.XSDParser;
 import org.talend.mdm.commmon.metadata.annotation.*;
+import org.talend.mdm.commmon.metadata.builder.FieldBuilder;
+import org.talend.mdm.commmon.metadata.builder.SimpleFieldBuilder;
+import org.talend.mdm.commmon.metadata.builder.TypeBuilder;
 import org.talend.mdm.commmon.metadata.validation.ValidationFactory;
 import org.talend.mdm.commmon.metadata.xsd.XSDVisitor;
 import org.talend.mdm.commmon.metadata.xsd.XmlSchemaWalker;
-import org.talend.mdm.commmon.util.core.ICoreConstants;
 
 import javax.xml.XMLConstants;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+
+import static org.talend.mdm.commmon.metadata.builder.TypeBuilder.anonymous;
+import static org.talend.mdm.commmon.metadata.builder.TypeBuilder.type;
 
 /**
  *
@@ -94,11 +82,9 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
 
     private final Map<String, Map<String, TypeMetadata>> nonInstantiableTypes = new HashMap<String, Map<String, TypeMetadata>>();
 
-    private final Stack<ComplexTypeMetadata> currentTypeStack = new Stack<ComplexTypeMetadata>();
+    private final Stack<TypeBuilder> currentTypeStack = new Stack<TypeBuilder>();
 
     private String targetNamespace;
-
-    private int anonymousCounter = 0;
 
     static {
         // Load XML Schema types
@@ -529,33 +515,21 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
                     idFields.put(field.getValue(), field);
                 }
             }
-            XmlSchemaAnnotationProcessorState state;
+            TypeBuilder typeBuilder = type(targetNamespace, typeName);
             try {
                 XSDAnnotation annotation = element.getAnnotation();
-                state = new XmlSchemaAnnotationProcessorState();
                 for (XmlSchemaAnnotationProcessor processor : XML_ANNOTATIONS_PROCESSORS) {
-                    processor.process(this, null, annotation, state);
+                    processor.process(annotation, typeBuilder);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Annotation processing exception while parsing info for type '" + typeName + "'.",
                         e);
             }
-            // If write is not allowed for everyone, at least add "administration".
-            if (state.getAllowWrite().isEmpty()) {
-                state.getAllowWrite().add(ICoreConstants.ADMIN_PERMISSION);
-            }
-            ComplexTypeMetadata type = new ComplexTypeMetadataImpl(targetNamespace, typeName, state.getAllowWrite(), state.getDenyCreate(),
-                    state.getHide(), state.getDenyPhysicalDelete(), state.getDenyLogicalDelete(), state.getSchematron(),
-                    state.getPrimaryKeyInfo(), state.getLookupFields(), true, state.getWorkflowAccessRights());
-            // Register parsed localized labels
-            Map<Locale, String> localeToLabel = state.getLocaleToLabel();
-            for (Map.Entry<Locale, String> entry : localeToLabel.entrySet()) {
-                type.registerName(entry.getKey(), entry.getValue());
-            }
             // Keep line and column of definition
-            type.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-            type.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-            type.setData(XSD_DOM_ELEMENT, element.getElement());
+            typeBuilder.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
+            typeBuilder.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
+            typeBuilder.setData(XSD_DOM_ELEMENT, element.getElement());
+            ComplexTypeMetadata type = typeBuilder.build();
             addTypeMetadata(type);
             // Keep usage information
             entityTypeUsage.get(element.getType()).add(type);
@@ -593,7 +567,7 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
                 }
             }
         } else { // Non "top level" elements means fields for the MDM entity type being parsed
-            FieldMetadata fieldMetadata;
+            FieldBuilder fieldMetadata;
             int minOccurs = ((XSDParticle) element.getContainer()).getMinOccurs();
             int maxOccurs = ((XSDParticle) element.getContainer()).getMaxOccurs();
             if (element.isElementDeclarationReference()
@@ -607,173 +581,93 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
             } else {
                 fieldMetadata = createFieldMetadata(element, currentTypeStack.peek(), minOccurs, maxOccurs);
             }
-            currentTypeStack.peek().addField(fieldMetadata);
+            currentTypeStack.peek().with(fieldMetadata);
         }
     }
 
-    // TODO Refactor!
-    private FieldMetadata createFieldMetadata(XSDElementDeclaration element, ComplexTypeMetadata containingType, int minOccurs,
+    private FieldBuilder createFieldMetadata(XSDElementDeclaration element, ComplexTypeMetadata containingType, int minOccurs,
             int maxOccurs) {
         String fieldName = element.getName();
         if (maxOccurs > 0 && minOccurs > maxOccurs) { // Eclipse XSD does not check this
             throw new IllegalArgumentException("Can not parse information on field '" + element.getQName() + "' of type '"
                     + containingType + "' (maxOccurs > minOccurs)");
         }
-        boolean isMany = maxOccurs == -1 || maxOccurs > 1;
-        XmlSchemaAnnotationProcessorState state = new XmlSchemaAnnotationProcessorState();
+        SimpleFieldBuilder fieldBuilder = FieldBuilder.field(fieldName);
         try {
             XSDAnnotation annotation = element.getAnnotation();
             for (XmlSchemaAnnotationProcessor processor : XML_ANNOTATIONS_PROCESSORS) {
-                processor.process(this, containingType, annotation, state);
+                processor.process(annotation, fieldBuilder);
             }
         } catch (Exception e) {
             throw new RuntimeException("Annotation processing exception while parsing info for field '" + fieldName
                     + "' in type '" + containingType.getName() + "'", e);
         }
-        boolean isMandatory = minOccurs > 0;
-        boolean isContained = false;
-        boolean isReference = state.isReference();
-        boolean fkIntegrity = state.isFkIntegrity();
-        boolean fkIntegrityOverride = state.isFkIntegrityOverride();
-        List<FieldMetadata> foreignKeyInfo = state.getForeignKeyInfo();
-        TypeMetadata fieldType = state.getFieldType();
-        FieldMetadata referencedField = state.getReferencedField();
-        TypeMetadata referencedType = state.getReferencedType();
-        List<String> hideUsers = state.getHide();
-        List<String> allowWriteUsers = state.getAllowWrite();
-        List<String> workflowAccessRights = state.getWorkflowAccessRights();
+        fieldBuilder.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
+        fieldBuilder.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
+        fieldBuilder.setData(XSD_DOM_ELEMENT, element.getElement());
+        if (minOccurs > 0) {
+            fieldBuilder.mandatory();
+        }
+        if (maxOccurs == -1 || maxOccurs > 1) {
+            fieldBuilder.many();
+        }
         XSDTypeDefinition schemaType = element.getType();
         if (schemaType instanceof XSDSimpleTypeDefinition) {
             XSDSimpleTypeDefinition simpleSchemaType = (XSDSimpleTypeDefinition) schemaType;
             XSDSimpleTypeDefinition content = simpleSchemaType.getBaseTypeDefinition();
             if (schemaType.getQName() != null) {
-                fieldType = new SoftTypeRef(this, schemaType.getTargetNamespace(), schemaType.getName(), false);
+                fieldBuilder.as(type(schemaType.getTargetNamespace(), schemaType.getName()));
             } else {
                 // Null QNames may happen for anonymous types extending other types.
-                fieldType = new SimpleTypeMetadata(targetNamespace, ANONYMOUS_PREFIX + String.valueOf(anonymousCounter++));
+                TypeBuilder typeBuilder = anonymous();
                 if (content != null) {
-                    fieldType.addSuperType(new SoftTypeRef(this, content.getTargetNamespace(), content.getName(), false));
+                    typeBuilder.inherits(type(content.getTargetNamespace(), content.getName()));
                 }
+                fieldBuilder.as(typeBuilder);
                 EList<XSDConstrainingFacet> facets = simpleSchemaType.getFacetContents();
                 for (XSDConstrainingFacet currentFacet : facets) {
                     if (currentFacet instanceof XSDMaxLengthFacet) {
-                        fieldType.setData(MetadataRepository.DATA_MAX_LENGTH,
-                                String.valueOf(((XSDMaxLengthFacet) currentFacet).getValue()));
+                        typeBuilder.maxLength(String.valueOf(((XSDMaxLengthFacet) currentFacet).getValue()));
                     } else if (LOGGER.isTraceEnabled()) {
                         LOGGER.trace("Ignore simple type facet on type '" + fieldName + "': " + currentFacet);
                     }
                 }
             }
-            fieldType.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-            fieldType.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-            fieldType.setData(XSD_DOM_ELEMENT, element.getElement());
-            if (isReference) {
-                ReferenceFieldMetadata referenceField = new ReferenceFieldMetadata(containingType, false, isMany, isMandatory,
-                        fieldName, (ComplexTypeMetadata) referencedType, referencedField, foreignKeyInfo, fkIntegrity,
-                        fkIntegrityOverride, fieldType, allowWriteUsers, hideUsers, workflowAccessRights, state.getForeignKeyFilter());
-                referenceField.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-                referenceField.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-                referenceField.setData(XSD_DOM_ELEMENT, element.getElement());
-                setLocalizedNames(referencedField, state.getLocaleToLabel());
-                return referenceField;
-            }
             if (content != null) {
                 if (content.getFacets().size() > 0) {
-                    boolean isEnumeration = false;
                     for (int i = 0; i < content.getFacets().size(); i++) {
                         XSDConstrainingFacet item = content.getFacets().get(i);
                         if (item instanceof XSDEnumerationFacet) {
-                            isEnumeration = true;
+                            return fieldBuilder.enumeration();
                         }
                     }
-                    if (isEnumeration) {
-                        EnumerationFieldMetadata enumField = new EnumerationFieldMetadata(containingType, false, isMany,
-                                isMandatory, fieldName, fieldType, allowWriteUsers, hideUsers, workflowAccessRights);
-                        enumField.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-                        enumField.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-                        enumField.setData(XSD_DOM_ELEMENT, element.getElement());
-                        setLocalizedNames(enumField, state.getLocaleToLabel());
-                        return enumField;
-                    } else {
-                        FieldMetadata field = new SimpleTypeFieldMetadata(containingType, false, isMany, isMandatory, fieldName,
-                                fieldType, allowWriteUsers, hideUsers, workflowAccessRights);
-                        field.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-                        field.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-                        field.setData(XSD_DOM_ELEMENT, element.getElement());
-                        setLocalizedNames(field, state.getLocaleToLabel());
-                        return field;
-                    }
                 } else {
-                    FieldMetadata field = new SimpleTypeFieldMetadata(containingType, false, isMany, isMandatory, fieldName,
-                            fieldType, allowWriteUsers, hideUsers, workflowAccessRights);
-                    field.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-                    field.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-                    field.setData(XSD_DOM_ELEMENT, element.getElement());
-                    setLocalizedNames(field, state.getLocaleToLabel());
-                    return field;
+                    return fieldBuilder;
                 }
             }
         }
-        if (fieldType == null) {
-            String qName = element.getType() == null ? null : element.getType().getQName();
-            if (qName != null) {
-                TypeMetadata metadata = getType(element.getType().getTargetNamespace(), element.getType().getName());
-                if (metadata != null) {
-                    fieldType = new SoftTypeRef(this, targetNamespace, schemaType.getName(), false);
-                    isContained = true;
-                } else {
-                    if (schemaType instanceof XSDComplexTypeDefinition) {
-                        fieldType = new SoftTypeRef(this, schemaType.getTargetNamespace(), schemaType.getName(), false);
-                        isContained = true;
-                    } else {
-                        throw new NotImplementedException("Support for '" + schemaType.getClass() + "'.");
-                    }
-                }
-            } else { // Ref & anonymous complex type
-                isContained = true;
-                XSDElementDeclaration refName = element.getResolvedElementDeclaration();
-                if (schemaType != null) {
-                    fieldType = new ComplexTypeMetadataImpl(targetNamespace, ANONYMOUS_PREFIX
-                            + String.valueOf(anonymousCounter++), false);
-                    isContained = true;
-                } else if (refName != null) {
-                    // Reference being an element, consider references as references to entity type.
-                    fieldType = new SoftTypeRef(this, refName.getTargetNamespace(), refName.getName(), true);
-                } else {
-                    throw new NotImplementedException();
-                }
+        String qName = element.getType() == null ? null : element.getType().getQName();
+        if (qName != null) {
+            fieldBuilder.as(type(element.getType().getTargetNamespace(), element.getType().getName()));
+        } else { // Ref & anonymous complex type
+            XSDElementDeclaration refName = element.getResolvedElementDeclaration();
+            if (schemaType != null) {
+                fieldBuilder.as(anonymous());
+            } else if (refName != null) {
+                // Reference being an element, consider references as references to entity type.
+                fieldBuilder.as(type(refName.getTargetNamespace(), refName.getName()));
+            } else {
+                throw new NotImplementedException();
             }
         }
-        if (isContained) {
-            ContainedTypeFieldMetadata containedField = new ContainedTypeFieldMetadata(containingType, isMany, isMandatory,
-                    fieldName, (ComplexTypeMetadata) fieldType, allowWriteUsers, hideUsers, workflowAccessRights);
-            containedField.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-            containedField.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-            containedField.setData(XSD_DOM_ELEMENT, element.getElement());
-            if (fieldType.getName().startsWith(ANONYMOUS_PREFIX)) {
-                currentTypeStack.push((ComplexTypeMetadata) containedField.getType());
-                {
-                    XmlSchemaWalker.walk(schemaType, this);
-                }
-                currentTypeStack.pop();
+        if (fieldType.getName().startsWith(ANONYMOUS_PREFIX)) {
+            currentTypeStack.push((ComplexTypeMetadata) containedField.getType());
+            {
+                XmlSchemaWalker.walk(schemaType, this);
             }
-            setLocalizedNames(containedField, state.getLocaleToLabel());
-            return containedField;
-        } else {
-            FieldMetadata field = new SimpleTypeFieldMetadata(containingType, false, isMany, isMandatory, fieldName, fieldType,
-                    allowWriteUsers, hideUsers, workflowAccessRights);
-            field.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
-            field.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
-            field.setData(XSD_DOM_ELEMENT, element.getElement());
-            setLocalizedNames(field, state.getLocaleToLabel());
-            return field;
+            currentTypeStack.pop();
         }
-    }
-
-    private static void setLocalizedNames(FieldMetadata field, Map<Locale, String> labels) {
-        for (Map.Entry<Locale, String> entry : labels.entrySet()) {
-            field.registerName(entry.getKey(), entry.getValue());
-        }
+        return fieldBuilder;
     }
 
     public MetadataRepository copy() {

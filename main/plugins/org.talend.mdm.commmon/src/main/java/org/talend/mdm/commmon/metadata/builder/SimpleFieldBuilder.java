@@ -6,7 +6,7 @@ import org.talend.mdm.commmon.metadata.SimpleTypeFieldMetadata;
 import java.util.Locale;
 import java.util.Map;
 
-class SimpleFieldBuilder extends FieldBuilder {
+public class SimpleFieldBuilder extends FieldBuilder {
 
     protected SimpleFieldBuilder() {
     }
@@ -29,6 +29,10 @@ class SimpleFieldBuilder extends FieldBuilder {
 
     public ReferenceFieldBuilder fk() {
         return new ReferenceFieldBuilder(this);
+    }
+
+    public EnumerationFieldBuilder enumeration() {
+        return new EnumerationFieldBuilder(this);
     }
 
 }
