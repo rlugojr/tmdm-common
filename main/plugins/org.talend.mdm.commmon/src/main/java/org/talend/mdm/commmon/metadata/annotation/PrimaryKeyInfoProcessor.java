@@ -16,37 +16,36 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.xsd.XSDAnnotation;
 import org.eclipse.xsd.util.XSDParser;
 import org.talend.mdm.commmon.metadata.*;
+import org.talend.mdm.commmon.metadata.builder.FieldBuilder;
+import org.talend.mdm.commmon.metadata.builder.TypeBuilder;
 import org.w3c.dom.Element;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import static org.talend.mdm.commmon.metadata.builder.TypeBuilder.type;
 
 public class PrimaryKeyInfoProcessor implements XmlSchemaAnnotationProcessor {
 
     @Override
-    public void process(MetadataRepository repository, ComplexTypeMetadata type, XSDAnnotation annotation, XmlSchemaAnnotationProcessorState state) {
+    public void process(XSDAnnotation annotation, TypeBuilder typeBuilder) {
         if (annotation != null) {
             EList<Element> appInfoElements = annotation.getApplicationInformation();
-            List<FieldMetadata> primaryKeyInfo = new LinkedList<FieldMetadata>();
             for (Element appInfo : appInfoElements) {
                 if ("X_PrimaryKeyInfo".equals(appInfo.getAttribute("source"))) { //$NON-NLS-1$ //$NON-NLS-2$
-                    primaryKeyInfo.add(handlePrimaryKeyInfo(repository, appInfo));
+                    typeBuilder.pkInfo(handlePrimaryKeyInfo(appInfo));
                 }
-            }
-            if (!primaryKeyInfo.isEmpty()) {
-                state.setPrimaryKeyInfo(primaryKeyInfo);
-            } else {
-                state.setPrimaryKeyInfo(Collections.<FieldMetadata>emptyList());
             }
         }
     }
 
-    private FieldMetadata handlePrimaryKeyInfo(MetadataRepository repository, Element appInfo) {
+    @Override
+    public FieldBuilder process(XSDAnnotation annotation, FieldBuilder fieldBuilder) {
+        throw new UnsupportedOperationException(); // Only for types
+    }
+
+    private FieldBuilder handlePrimaryKeyInfo(Element appInfo) {
         String path = appInfo.getTextContent();
         String typeName = StringUtils.substringBefore(path, "/").trim(); //$NON-NLS-1$
         String fieldName = StringUtils.substringAfter(path, "/").trim(); //$NON-NLS-1$
-        SoftFieldRef field = new SoftFieldRef(repository, fieldName, typeName);
+        FieldBuilder field = FieldBuilder.field(fieldName, type(typeName));
         field.setData(MetadataRepository.XSD_LINE_NUMBER, XSDParser.getStartLine(appInfo));
         field.setData(MetadataRepository.XSD_COLUMN_NUMBER, XSDParser.getStartColumn(appInfo));
         field.setData(MetadataRepository.XSD_DOM_ELEMENT, appInfo);

@@ -41,7 +41,7 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
     }
 
     public static TypeBuilder anonymous() {
-        return type(StringUtils.EMPTY, MetadataRepository.ANONYMOUS_PREFIX + anonymousCounter++);
+        return type(StringUtils.EMPTY, MetadataRepository.ANONYMOUS_PREFIX + anonymousCounter++).reusable();
     }
 
     public TypeBuilder write(String role) {
@@ -91,7 +91,47 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
         return this;
     }
 
-    public TypeBuilder maxLength(String maxLength) {
-        return null;
+    public TypeBuilder length(int maxLength) {
+        return this;
+    }
+
+    public TypeBuilder reusable() {
+        return this;
+    }
+
+    public TypeBuilder simple() {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder pkInfo(FieldBuilder fieldBuilder) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder validationRule(String validationRule) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder lookupField(SimpleFieldBuilder field) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder hide(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder denyCreate(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder denyLogicalDelete(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder denyPhysicalDelete(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public TypeBuilder workflow(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
     }
 }

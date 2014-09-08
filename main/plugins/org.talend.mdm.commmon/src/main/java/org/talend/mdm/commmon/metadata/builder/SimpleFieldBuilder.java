@@ -27,10 +27,12 @@ public class SimpleFieldBuilder extends FieldBuilder {
         return field;
     }
 
+    @Override
     public ReferenceFieldBuilder fk() {
         return new ReferenceFieldBuilder(this);
     }
 
+    @Override
     public EnumerationFieldBuilder enumeration() {
         return new EnumerationFieldBuilder(this);
     }

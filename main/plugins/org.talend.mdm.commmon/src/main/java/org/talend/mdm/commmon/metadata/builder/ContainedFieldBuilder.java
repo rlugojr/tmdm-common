@@ -17,4 +17,14 @@ public class ContainedFieldBuilder extends FieldBuilder {
         }
         return field;
     }
+
+    @Override
+    public ReferenceFieldBuilder fk() {
+        return null;
+    }
+
+    @Override
+    public EnumerationFieldBuilder enumeration() {
+        return null;
+    }
 }

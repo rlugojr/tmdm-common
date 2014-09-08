@@ -48,12 +48,12 @@ public class ReferenceFieldBuilder extends FieldBuilder {
         return this;
     }
 
-    public ReferenceFieldBuilder fkIntegrity() {
+    public ReferenceFieldBuilder fkIntegrity(boolean enable) {
         this.fkIntegrity = true;
         return this;
     }
 
-    public ReferenceFieldBuilder allowIntegrityOverride() {
+    public ReferenceFieldBuilder allowIntegrityOverride(boolean enable) {
         this.allowFkIntegrityOverride = true;
         return this;
     }
@@ -80,5 +80,15 @@ public class ReferenceFieldBuilder extends FieldBuilder {
         return new ReferenceFieldMetadata(null, isKey, isMany, isMandatory, name, referencedType, referencedField,
                 foreignKeyInfoFields, fkIntegrity, allowFkIntegrityOverride, fieldType.build(), allowWriteUsers, hideUsers,
                 workflowAccessRights, foreignKeyFilter);
+    }
+
+    @Override
+    public ReferenceFieldBuilder fk() {
+        return null;
+    }
+
+    @Override
+    public EnumerationFieldBuilder enumeration() {
+        return null;
     }
 }

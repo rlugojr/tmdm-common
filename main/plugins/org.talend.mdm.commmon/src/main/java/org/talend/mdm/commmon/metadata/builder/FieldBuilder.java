@@ -57,12 +57,12 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata>, Me
         return builder;
     }
 
-    public FieldBuilder name(String name, Locale locale) {
+    public FieldBuilder name(Locale locale, String name) {
         fieldNameLocale.put(locale, name);
         return this;
     }
 
-    public FieldBuilder as(TypeBuilder type) {
+    public FieldBuilder of(TypeBuilder type) {
         fieldType = type;
         return this;
     }
@@ -103,5 +103,33 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata>, Me
     @Override
     public <X> X getData(String key) {
         return null;
+    }
+
+    public abstract ReferenceFieldBuilder fk();
+
+    public abstract EnumerationFieldBuilder enumeration();
+
+    public FieldBuilder hide(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public FieldBuilder write(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public FieldBuilder denyCreate(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public FieldBuilder denyLogicalDelete(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public FieldBuilder denyPhysicalDelete(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
+    }
+
+    public FieldBuilder workflow(String role) {
+        throw new org.apache.commons.lang.NotImplementedException();
     }
 }

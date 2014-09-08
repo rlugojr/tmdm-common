@@ -14,15 +14,16 @@ package org.talend.mdm.commmon.metadata.annotation;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xsd.XSDAnnotation;
-import org.talend.mdm.commmon.metadata.ComplexTypeMetadata;
-import org.talend.mdm.commmon.metadata.MetadataRepository;
+import org.talend.mdm.commmon.metadata.builder.FieldBuilder;
+import org.talend.mdm.commmon.metadata.builder.TypeBuilder;
 import org.w3c.dom.Element;
 
 import java.util.Locale;
 
 public class LabelAnnotationProcessor implements XmlSchemaAnnotationProcessor {
+
     @Override
-    public void process(MetadataRepository repository, ComplexTypeMetadata type, XSDAnnotation annotation, XmlSchemaAnnotationProcessorState state) {
+    public void process(XSDAnnotation annotation, TypeBuilder typeBuilder) {
         if (annotation != null) {
             EList<Element> appInfoElements = annotation.getApplicationInformation();
             for (Element appInfo : appInfoElements) {
@@ -30,9 +31,25 @@ public class LabelAnnotationProcessor implements XmlSchemaAnnotationProcessor {
                 if (source != null && source.startsWith("X_Label_")) { //$NON-NLS-1$
                     String language = StringUtils.substringAfter(source, "X_Label_"); //$NON-NLS-1$
                     Locale locale = new Locale(language.toLowerCase());
-                    state.registerTypeName(locale, appInfo.getTextContent());
+                    typeBuilder.name(locale, appInfo.getTextContent());
                 }
             }
         }
+    }
+
+    @Override
+    public FieldBuilder process(XSDAnnotation annotation, FieldBuilder fieldBuilder) {
+        if (annotation != null) {
+            EList<Element> appInfoElements = annotation.getApplicationInformation();
+            for (Element appInfo : appInfoElements) {
+                String source = appInfo.getAttribute("source"); //$NON-NLS-1$
+                if (source != null && source.startsWith("X_Label_")) { //$NON-NLS-1$
+                    String language = StringUtils.substringAfter(source, "X_Label_"); //$NON-NLS-1$
+                    Locale locale = new Locale(language.toLowerCase());
+                    fieldBuilder.name(locale, appInfo.getTextContent());
+                }
+            }
+        }
+        return fieldBuilder;
     }
 }

@@ -19,22 +19,24 @@ import org.talend.mdm.commmon.metadata.builder.TypeBuilder;
 
 /**
  * Enrich a {@link ComplexTypeMetadata} being built with information contained in XML Schema information.
- * @see MetadataRepository#createFieldMetadata(org.eclipse.xsd.XSDElementDeclaration, org.talend.mdm.commmon.metadata.ComplexTypeMetadata, int, int)
  */
 public interface XmlSchemaAnnotationProcessor {
 
     /**
-     * Process additional type information contained in {@link XSDAnnotation}.
-     *
-     * @param repository The repository that contains the <code>type</code>.
-     * @param type       The {@link ComplexTypeMetadata} being enriched by the <code>annotation</code>.
+     * Process additional type information contained in {@link XSDAnnotation} for the
+     * {@link org.talend.mdm.commmon.metadata.builder.TypeBuilder type}.
+     * 
      * @param annotation An XML Schema annotation.
-     * @param state      A {@link org.talend.mdm.commmon.metadata.annotation.XmlSchemaAnnotationProcessorState} that keeps track of information parsed by
-     *                   {@link org.talend.mdm.commmon.metadata.annotation.XmlSchemaAnnotationProcessor}.
+     * @param typeBuilder The type being built.
      */
-    void process(MetadataRepository repository, ComplexTypeMetadata type, XSDAnnotation annotation, XmlSchemaAnnotationProcessorState state);
-
     void process(XSDAnnotation annotation, TypeBuilder typeBuilder);
 
-    void process(XSDAnnotation annotation, FieldBuilder typeBuilder);
+    /**
+     * Process additional type information contained in {@link XSDAnnotation} for the
+     * {@link org.talend.mdm.commmon.metadata.builder.FieldBuilder field}.
+     *
+     * @param annotation An XML Schema annotation.
+     * @param fieldBuilder The field being built.
+     */
+    FieldBuilder process(XSDAnnotation annotation, FieldBuilder fieldBuilder);
 }
