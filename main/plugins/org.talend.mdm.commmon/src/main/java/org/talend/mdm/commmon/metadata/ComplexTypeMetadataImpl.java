@@ -353,6 +353,8 @@ public class ComplexTypeMetadataImpl extends MetadataExtensions implements Compl
         for (ComplexTypeMetadata subType : subTypes) {
             copy.subTypes.add((ComplexTypeMetadata) subType.copy());
         }
+        // Copy key fields
+        copy.keyFields.clear(); // Need to clear due to use of addField(...) during field copy.
         Collection<FieldMetadata> typeKeyFields = getKeyFields();
         for (FieldMetadata typeKeyField : typeKeyFields) {
             FieldMetadata fieldCopy = typeKeyField.copy();
