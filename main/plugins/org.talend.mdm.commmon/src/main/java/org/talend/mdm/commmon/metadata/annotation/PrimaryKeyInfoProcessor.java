@@ -38,7 +38,8 @@ public class PrimaryKeyInfoProcessor implements XmlSchemaAnnotationProcessor {
 
     @Override
     public FieldBuilder process(XSDAnnotation annotation, FieldBuilder fieldBuilder) {
-        throw new UnsupportedOperationException(); // Only for types
+        // Nothing to do (only for types).
+        return fieldBuilder;
     }
 
     private FieldBuilder handlePrimaryKeyInfo(Element appInfo) {

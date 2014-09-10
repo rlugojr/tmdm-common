@@ -24,7 +24,7 @@ public class FieldBuilderTest extends TestCase {
     }
 
     public void testLocalizedField() throws Exception {
-        FieldMetadata fieldMetadata = field("test", Types.STRING).name("test_fr", Locale.FRANCE).build();
+        FieldMetadata fieldMetadata = field("test", Types.STRING).name(Locale.FRANCE, "test_fr").build();
         assertEquals("test", fieldMetadata.getName());
         assertEquals("test_fr", fieldMetadata.getName(Locale.FRANCE));
         assertEquals("test", fieldMetadata.getName(Locale.ENGLISH));
@@ -41,7 +41,7 @@ public class FieldBuilderTest extends TestCase {
     }
 
     public void testLocalizedField1() throws Exception {
-        FieldMetadata fieldMetadata = field("test", anonymous()).name("test_fr", Locale.FRANCE).build();
+        FieldMetadata fieldMetadata = field("test", anonymous()).name(Locale.FRANCE, "test_fr").build();
         assertEquals("test", fieldMetadata.getName());
         assertEquals("test_fr", fieldMetadata.getName(Locale.FRANCE));
         assertEquals("test", fieldMetadata.getName(Locale.ENGLISH));

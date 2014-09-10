@@ -50,7 +50,7 @@ public class ReferenceFieldBuilderTest extends TestCase {
         FieldMetadata fk = field("fk", Types.STRING).fk()
                 .referencedType(type("Reference"))
                 .referencedField(field("id", Types.STRING))
-                .fkIntegrity(Boolean.valueOf(appInfo.getTextContent())).build();
+                .fkIntegrity(true).build();
         assertTrue(fk instanceof ReferenceFieldMetadata);
         assertTrue(((ReferenceFieldMetadata) fk).isFKIntegrity());
         assertFalse(((ReferenceFieldMetadata) fk).allowFKIntegrityOverride());
@@ -60,7 +60,7 @@ public class ReferenceFieldBuilderTest extends TestCase {
         FieldMetadata fk = field("fk", Types.STRING).fk()
                 .referencedType(type("Reference"))
                 .referencedField(field("id", Types.STRING))
-                .allowIntegrityOverride(Boolean.valueOf(appInfo.getTextContent())).build();
+                .allowIntegrityOverride(true).build();
         assertTrue(fk instanceof ReferenceFieldMetadata);
         assertFalse(((ReferenceFieldMetadata) fk).isFKIntegrity());
         assertTrue(((ReferenceFieldMetadata) fk).allowFKIntegrityOverride());

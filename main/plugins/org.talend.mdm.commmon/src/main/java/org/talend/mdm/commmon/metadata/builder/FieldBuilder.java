@@ -6,10 +6,7 @@ import org.talend.mdm.commmon.metadata.FieldMetadata;
 import org.talend.mdm.commmon.metadata.MetadataExtensible;
 
 import javax.xml.XMLConstants;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -26,11 +23,11 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata>, Me
 
     protected TypeBuilder fieldType;
 
-    protected List<String> allowWriteUsers;
+    protected List<String> allowWriteUsers = Collections.emptyList();
 
-    protected List<String> hideUsers;
+    protected List<String> hideUsers = Collections.emptyList();
 
-    protected List<String> workflowAccessRights;
+    protected List<String> workflowAccessRights= Collections.emptyList();
 
     protected final Map<Locale, String> fieldNameLocale = new HashMap<Locale, String>();
 
@@ -110,26 +107,26 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata>, Me
     public abstract EnumerationFieldBuilder enumeration();
 
     public FieldBuilder hide(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public FieldBuilder write(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public FieldBuilder denyCreate(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public FieldBuilder denyLogicalDelete(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public FieldBuilder denyPhysicalDelete(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public FieldBuilder workflow(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 }

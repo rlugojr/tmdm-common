@@ -23,7 +23,7 @@ public class ForeignKeyProcessor implements XmlSchemaAnnotationProcessor {
 
     @Override
     public void process(XSDAnnotation annotation, TypeBuilder typeBuilder) {
-        throw new UnsupportedOperationException();
+        // Nothing to do
     }
 
     @Override

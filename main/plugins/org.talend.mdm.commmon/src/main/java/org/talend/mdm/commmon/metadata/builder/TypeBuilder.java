@@ -16,7 +16,7 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
 
     private static int anonymousCounter = 0;
 
-    private final String namespace;
+    private String namespace;
 
     private final String name;
 
@@ -26,6 +26,12 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
 
     // If write is not allowed for everyone, at least add "administration".
     private List<String> writeRoles = Collections.singletonList(ICoreConstants.ADMIN_PERMISSION);
+
+    private final List<TypeBuilder> superTypes = new LinkedList<TypeBuilder>();
+
+    private final List<FieldBuilder> pkInfoFields = new LinkedList<FieldBuilder>();
+
+    private final Map<Locale, String> localizedNames = new HashMap<Locale, String>();
 
     private TypeBuilder(String namespace, String name) {
         this.namespace = namespace;
@@ -46,7 +52,7 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
 
     public TypeBuilder write(String role) {
         writeRoles = new LinkedList<String>();
-        if(!writeRoles.contains(role)) {
+        if (!writeRoles.contains(role)) {
             writeRoles.add(role);
         }
         return this;
@@ -59,16 +65,29 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
 
     public <T extends TypeMetadata> T build() {
         if (XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(namespace)) {
-            return (T) SIMPLE_TYPE_REPOSITORY.getNonInstantiableType(namespace, name);
+            SimpleTypeMetadata simpleTypeMetadata = new SimpleTypeMetadata(namespace, name);
+            for (TypeBuilder superType : superTypes) {
+                simpleTypeMetadata.addSuperType(superType.build());
+            }
+            return (T) simpleTypeMetadata;
         } else {
             type = new ComplexTypeMetadataImpl(namespace, name, true);
             apply(type);
+            for (TypeBuilder superType : superTypes) {
+                type.addSuperType(superType.build());
+            }
+            for (FieldBuilder field : pkInfoFields) {
+                type.getPrimaryKeyInfo().add(field.build());
+            }
+            for (Map.Entry<Locale, String> entry : localizedNames.entrySet()) {
+                type.registerName(entry.getKey(), entry.getValue());
+            }
             return (T) type;
         }
     }
 
     public TypeBuilder name(Locale locale, String name) {
-        // TODO
+        localizedNames.put(locale, name);
         return this;
     }
 
@@ -88,6 +107,7 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
     }
 
     public TypeBuilder inherits(TypeBuilder type) {
+        superTypes.add(type);
         return this;
     }
 
@@ -100,38 +120,40 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
     }
 
     public TypeBuilder simple() {
-        throw new org.apache.commons.lang.NotImplementedException();
+        namespace = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+        return this;
     }
 
     public TypeBuilder pkInfo(FieldBuilder fieldBuilder) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        pkInfoFields.add(fieldBuilder);
+        return this;
     }
 
     public TypeBuilder validationRule(String validationRule) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public TypeBuilder lookupField(SimpleFieldBuilder field) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public TypeBuilder hide(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public TypeBuilder denyCreate(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public TypeBuilder denyLogicalDelete(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public TypeBuilder denyPhysicalDelete(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 
     public TypeBuilder workflow(String role) {
-        throw new org.apache.commons.lang.NotImplementedException();
+        return this;
     }
 }

@@ -102,7 +102,9 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
         commonTypes.load(internalTypes, NoOpValidationHandler.INSTANCE);
         // Prevent further modifications on common types
         for (Map.Entry<String, Map<String, TypeMetadata>> entry : commonTypes.nonInstantiableTypes.entrySet()) {
-            commonTypes.nonInstantiableTypes.put(entry.getKey(), Collections.unmodifiableMap(entry.getValue()));
+            if (entry.getValue() != null) {
+                commonTypes.nonInstantiableTypes.put(entry.getKey(), Collections.unmodifiableMap(entry.getValue()));
+            }
         }
         for (Map.Entry<String, Map<String, TypeMetadata>> entry : commonTypes.entityTypes.entrySet()) {
             if (entry.getValue() != null) {
@@ -111,10 +113,14 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
         }
     }
 
+    private Map<String, XSDXPathDefinition> idFields;
+
     public MetadataRepository() {
         if (commonTypes != null) {
             for (Map.Entry<String, Map<String, TypeMetadata>> entry : commonTypes.nonInstantiableTypes.entrySet()) {
-                this.nonInstantiableTypes.put(entry.getKey(), new TreeMap<String, TypeMetadata>(entry.getValue()));
+                if (entry.getValue() != null) {
+                    this.nonInstantiableTypes.put(entry.getKey(), new TreeMap<String, TypeMetadata>(entry.getValue()));
+                }
             }
             for (Map.Entry<String, Map<String, TypeMetadata>> entry : commonTypes.entityTypes.entrySet()) {
                 if (entry.getValue() != null) {
@@ -493,7 +499,7 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
                 return;
             }
             // Get id field names
-            Map<String, XSDXPathDefinition> idFields = new LinkedHashMap<String, XSDXPathDefinition>();
+            idFields = new LinkedHashMap<String, XSDXPathDefinition>();
             EList<XSDIdentityConstraintDefinition> constraints = element.getIdentityConstraintDefinitions();
             for (XSDIdentityConstraintDefinition constraint : constraints) {
                 EList<XSDXPathDefinition> fields = constraint.getFields();
@@ -558,6 +564,9 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
                 fieldMetadata = createFieldMetadata(elementDeclaration, minOccurs, maxOccurs);
             } else {
                 fieldMetadata = createFieldMetadata(element, minOccurs, maxOccurs);
+            }
+            if (idFields.remove(element.getName()) != null) {
+                fieldMetadata.pk();
             }
             typeBuilders.peek().with(fieldMetadata);
         }
@@ -628,7 +637,13 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
         } else { // Ref & anonymous complex type
             XSDElementDeclaration refName = element.getResolvedElementDeclaration();
             if (schemaType != null) {
-                field.of(anonymous());
+                TypeBuilder type = anonymous();
+                typeBuilders.push(type);
+                {
+                    XmlSchemaWalker.walk(schemaType, this);
+                }
+                typeBuilders.pop();
+                field.of(type);
             } else if (refName != null) {
                 // Reference being an element, consider references as references to entity type.
                 field.of(type(refName.getTargetNamespace(), refName.getName()));

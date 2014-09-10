@@ -67,6 +67,7 @@ public class SchematronProcessor implements XmlSchemaAnnotationProcessor {
 
     @Override
     public FieldBuilder process(XSDAnnotation annotation, FieldBuilder fieldBuilder) {
-        throw new UnsupportedOperationException();
+        // Nothing to do
+        return fieldBuilder;
     }
 }

@@ -2,6 +2,8 @@ package org.talend.mdm.commmon.metadata.builder;
 
 import org.talend.mdm.commmon.metadata.FieldMetadata;
 import org.talend.mdm.commmon.metadata.SimpleTypeFieldMetadata;
+import org.talend.mdm.commmon.metadata.TypeMetadata;
+import org.talend.mdm.commmon.metadata.UnresolvedFieldMetadata;
 
 import java.util.Locale;
 import java.util.Map;
@@ -19,12 +21,17 @@ public class SimpleFieldBuilder extends FieldBuilder {
 
     @Override
     protected FieldMetadata build() {
-        SimpleTypeFieldMetadata field = new SimpleTypeFieldMetadata(null, isKey, isMany, isMandatory, name, fieldType.build(),
-                allowWriteUsers, hideUsers, workflowAccessRights);
-        for (Map.Entry<Locale, String> entry : fieldNameLocale.entrySet()) {
-            field.registerName(entry.getKey(), entry.getValue());
+        if (fieldType != null) { // Unresolved fields may have a null type.
+            TypeMetadata type = fieldType.build();
+            SimpleTypeFieldMetadata field = new SimpleTypeFieldMetadata(null, isKey, isMany, isMandatory, name, type,
+                    allowWriteUsers, hideUsers, workflowAccessRights);
+            for (Map.Entry<Locale, String> entry : fieldNameLocale.entrySet()) {
+                field.registerName(entry.getKey(), entry.getValue());
+            }
+            return field;
+        } else {
+            return new UnresolvedFieldMetadata(name, isKey, null);
         }
-        return field;
     }
 
     @Override
