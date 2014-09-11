@@ -47,8 +47,8 @@ public abstract class FieldBuilder implements Predicate<ComplexTypeMetadata>, Me
         return builder;
     }
 
-    public static ContainedFieldBuilder field(String name, TypeBuilder typeBuilder) {
-        ContainedFieldBuilder builder = new ContainedFieldBuilder();
+    public static SimpleFieldBuilder field(String name, TypeBuilder typeBuilder) {
+        SimpleFieldBuilder builder = new SimpleFieldBuilder();
         builder.name = name;
         builder.fieldType = typeBuilder;
         return builder;

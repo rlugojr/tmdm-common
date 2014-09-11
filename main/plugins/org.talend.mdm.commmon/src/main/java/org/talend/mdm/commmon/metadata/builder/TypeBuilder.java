@@ -1,37 +1,50 @@
 package org.talend.mdm.commmon.metadata.builder;
 
+import java.util.*;
+
+import javax.xml.XMLConstants;
+
 import org.apache.commons.lang.StringUtils;
 import org.talend.mdm.commmon.metadata.*;
 import org.talend.mdm.commmon.util.core.ICoreConstants;
-
-import javax.xml.XMLConstants;
-import java.util.*;
 
 /**
  *
  */
 public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataExtensible {
 
-    private static final MetadataRepository SIMPLE_TYPE_REPOSITORY = new MetadataRepository();
-
     private static int anonymousCounter = 0;
-
-    private String namespace;
 
     private final String name;
 
-    private ComplexTypeMetadata type;
-
     private final Map<String, Object> data = new HashMap<String, Object>();
-
-    // If write is not allowed for everyone, at least add "administration".
-    private List<String> writeRoles = Collections.singletonList(ICoreConstants.ADMIN_PERMISSION);
 
     private final List<TypeBuilder> superTypes = new LinkedList<TypeBuilder>();
 
     private final List<FieldBuilder> pkInfoFields = new LinkedList<FieldBuilder>();
 
     private final Map<Locale, String> localizedNames = new HashMap<Locale, String>();
+
+    private String namespace;
+
+    private ComplexTypeMetadata type;
+
+    // If write is not allowed for everyone, at least add "administration".
+    private List<String> writeRoles = Collections.singletonList(ICoreConstants.ADMIN_PERMISSION);
+
+    private List<String> denyCreate = Collections.emptyList();
+
+    private List<String> hideUsers = Collections.emptyList();
+
+    private List<String> physicalDelete = Collections.emptyList();
+
+    private List<String> logicalDelete = Collections.emptyList();
+
+    private String schematron = StringUtils.EMPTY;
+
+    private List<FieldMetadata> lookupFields = Collections.emptyList();
+
+    private List<String> workflowAccessRights = Collections.emptyList();
 
     private TypeBuilder(String namespace, String name) {
         this.namespace = namespace;
@@ -71,13 +84,15 @@ public class TypeBuilder extends Loop<ComplexTypeMetadata> implements MetadataEx
             }
             return (T) simpleTypeMetadata;
         } else {
-            type = new ComplexTypeMetadataImpl(namespace, name, true);
+            List<FieldMetadata> primaryKeyInfo = new ArrayList<FieldMetadata>(pkInfoFields.size());
+            for (FieldBuilder field : pkInfoFields) {
+                primaryKeyInfo.add(field.build());
+            }
+            type = new ComplexTypeMetadataImpl(namespace, name, writeRoles, denyCreate, hideUsers, physicalDelete, logicalDelete,
+                    schematron, primaryKeyInfo, lookupFields, true, workflowAccessRights);
             apply(type);
             for (TypeBuilder superType : superTypes) {
                 type.addSuperType(superType.build());
-            }
-            for (FieldBuilder field : pkInfoFields) {
-                type.getPrimaryKeyInfo().add(field.build());
             }
             for (Map.Entry<Locale, String> entry : localizedNames.entrySet()) {
                 type.registerName(entry.getKey(), entry.getValue());
