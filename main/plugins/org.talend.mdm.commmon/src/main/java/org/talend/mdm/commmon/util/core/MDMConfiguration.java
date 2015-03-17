@@ -142,10 +142,10 @@ public final class MDMConfiguration {
         return !(dbType != null && !dbType.toString().equals(EDBType.EXIST.getName()));
     }
 
-    public static String getHttpPort() {
-        String port = getConfiguration().getProperty("http.server.port"); //$NON-NLS-1$
-        port = port == null ? "8180" : port; //$NON-NLS-1$
-        return port;
+    public static String getEndpointUrl() {
+        String endpointUrl = getConfiguration().getProperty("mdm.endpoint.url"); //$NON-NLS-1$
+        endpointUrl = endpointUrl == null ? "http://localhost:8080/talendmdm/services/soap" : endpointUrl; //$NON-NLS-1$
+        return endpointUrl;
     }
 
     public static String getAdminPassword() {
