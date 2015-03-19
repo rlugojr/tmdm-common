@@ -125,7 +125,7 @@
                                     <format property="product.build.date" pattern="yyyy/MM/dd hh:mm" />
                                 </tstamp>
                                 <copy
-                                    file="${tom.location}/org.talend.mdm.base/version.properties.template"
+                                    file="${common.location}/org.talend.mdm.base/version.properties.template"
                                     tofile="${project.build.directory}/generated-version/${version.properties}"
                                     preservelastmodified="true">
                                     <filterset>
