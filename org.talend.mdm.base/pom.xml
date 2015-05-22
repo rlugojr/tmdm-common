@@ -1084,6 +1084,11 @@
                 <artifactId>jstl</artifactId>
                 <version>1.2</version>
             </dependency>
+	    <dependency>
+      		<groupId>com.wordnik</groupId>
+      		<artifactId>swagger-jaxrs</artifactId>
+      		<version>1.5.3-M1</version>
+    	    </dependency>
         </dependencies>
     </dependencyManagement>
 
