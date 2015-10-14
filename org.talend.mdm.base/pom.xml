@@ -90,6 +90,16 @@
             </snapshots>
             <url>http://newbuild.talend.com:8081/nexus/content/repositories/releases</url>
         </repository>
+        <repository>
+            <id>TalendOpenSourceRelease</id>
+            <url>http://newbuild.talend.com:8081/nexus/content/repositories/TalendOpenSourceRelease</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
 
@@ -924,7 +934,7 @@
             <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
-                <version>2.3</version>
+                <version>2.6</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
