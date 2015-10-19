@@ -10,11 +10,33 @@
 
 package org.talend.mdm.commmon.metadata.compare;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
-import org.talend.mdm.commmon.metadata.*;
+import org.talend.mdm.commmon.metadata.ComplexTypeMetadata;
+import org.talend.mdm.commmon.metadata.ContainedComplexTypeMetadata;
+import org.talend.mdm.commmon.metadata.ContainedTypeFieldMetadata;
+import org.talend.mdm.commmon.metadata.DefaultMetadataVisitor;
+import org.talend.mdm.commmon.metadata.EnumerationFieldMetadata;
+import org.talend.mdm.commmon.metadata.FieldMetadata;
+import org.talend.mdm.commmon.metadata.MetadataRepository;
+import org.talend.mdm.commmon.metadata.MetadataUtils;
+import org.talend.mdm.commmon.metadata.MetadataVisitable;
+import org.talend.mdm.commmon.metadata.ReferenceFieldMetadata;
+import org.talend.mdm.commmon.metadata.SimpleTypeFieldMetadata;
+import org.talend.mdm.commmon.metadata.SimpleTypeMetadata;
+import org.talend.mdm.commmon.metadata.TypeMetadata;
 
 public class Compare {
 
@@ -31,19 +53,14 @@ public class Compare {
      * @see org.talend.mdm.commmon.metadata.compare.Compare.DiffResults
      */
     public static DiffResults compare(MetadataRepository left, MetadataRepository right) {
+        Collection<ComplexTypeMetadata> leftEntityTypes = left.getUserComplexTypes();
         DiffResults diffResults = new DiffResults();
-        Collection<ComplexTypeMetadata> entityTypes = left.getUserComplexTypes();
+        compareEntitiesChange(left, right, diffResults);
+        
         DumpContent dumpContent = new DumpContent();
-        for (ComplexTypeMetadata leftType : entityTypes) {
-            // Check if left type still exists
+        for (ComplexTypeMetadata leftType : leftEntityTypes) {
             ComplexTypeMetadata rightType = right.getComplexType(leftType.getName());
-            if (rightType == null) {
-                // Right type does not exist
-                diffResults.removeChanges.add(new RemoveChange(leftType));
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("[REMOVED] Type " + leftType + " no longer exist.");
-                }
-            } else {
+            if(rightType != null){
                 // Read left content
                 List<MetadataVisitable> leftContent = new ArrayList<MetadataVisitable>(leftType.accept(dumpContent));
                 dumpContent.reset();
@@ -114,29 +131,13 @@ public class Compare {
                 }
             }
         }
-        // TMDM-7231 Compare reusable type usage count
+        
         List<ComplexTypeMetadata> instantiableTypes = left.getNonInstantiableTypes();
+        compareTypesChange(left, right, diffResults);
         for (ComplexTypeMetadata leftType : instantiableTypes) {
             TypeMetadata rightType = right.getNonInstantiableType(leftType.getNamespace(), leftType.getName());
             if (rightType != null) {
-                if (rightType instanceof ComplexTypeMetadata) {
-                    int leftUsageCount = MetadataUtils.countEntityUsageCount(leftType);
-                    int rightUsageCount = MetadataUtils.countEntityUsageCount((ComplexTypeMetadata) rightType);
-                    if (leftUsageCount == 1 && rightUsageCount > 1) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("[MODIFY] Type '" + leftType.getName() + "' is now used " + rightUsageCount
-                                    + " (was previously " + leftUsageCount + ").");
-                        }
-                        // Changing the number of usage of a reusable type may have consequences on the underlying
-                        // storage schema.
-                        diffResults.modifyChanges.add(new ModifyChange(leftType, rightType));
-                    } else {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("Type '" + leftType.getName() + "' usages did not change (was " + leftUsageCount
-                                    + " and is now " + rightUsageCount + ").");
-                        }
-                    }
-                } else if (!leftType.getClass().equals(rightType.getClass())) {
+                if (!leftType.getClass().equals(rightType.getClass())) {
                     // This is a very strange case (e.g. leftType was a simple type and new is a complex one...)
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("[MODIFY] Type '" + leftType.getName() + "' changed (parsed object is different).");
@@ -144,11 +145,6 @@ public class Compare {
                     diffResults.removeChanges.add(new RemoveChange(leftType));
                     diffResults.addChanges.add(new AddChange(rightType));
                 }
-            } else {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("[REMOVED] Type '" + leftType.getName() + "' no longer exist in new version.");
-                }
-                diffResults.removeChanges.add(new RemoveChange(leftType));
             }
         }
         return diffResults;
@@ -252,12 +248,91 @@ public class Compare {
             return Collections.unmodifiableList(modifyChanges);
         }
 
+        @SuppressWarnings("unused")
         public List<Change> getActions() {
             List<Change> allChanges = new ArrayList<Change>(addChanges.size() + removeChanges.size() + modifyChanges.size());
             allChanges.addAll(addChanges);
             allChanges.addAll(removeChanges);
             allChanges.addAll(modifyChanges);
             return allChanges;
+        }
+    }
+    
+    @SuppressWarnings("unused")
+    private static void compareEntitiesChange(MetadataRepository left, MetadataRepository right, DiffResults diffResults){
+        List<ComplexTypeMetadata> unusedLeftEntityTypes = new ArrayList<ComplexTypeMetadata>(); 
+        List<ComplexTypeMetadata> unusedRightEntityTypes = new ArrayList<ComplexTypeMetadata>(); 
+        Set<ComplexTypeMetadata> complexTypeSet = new HashSet<ComplexTypeMetadata>();
+        complexTypeSet.addAll(left.getUserComplexTypes());
+        complexTypeSet.addAll(right.getUserComplexTypes());
+        
+        for(ComplexTypeMetadata ctm : complexTypeSet){
+            if (left.getComplexType(ctm.getName()) != null && right.getComplexType(ctm.getName()) == null) {
+                unusedLeftEntityTypes.add(ctm);
+            } else if (left.getComplexType(ctm.getName()) == null && right.getComplexType(ctm.getName()) != null){
+                unusedRightEntityTypes.add(ctm);
+            }
+        }
+        
+        if(unusedLeftEntityTypes != null && unusedLeftEntityTypes.size() > 0){
+            for(ComplexTypeMetadata leftType : unusedLeftEntityTypes){
+                // Right type does not exist
+                diffResults.removeChanges.add(new RemoveChange(leftType));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("[REMOVED] Type " + leftType + " no longer exist.");  //$NON-NLS-1$//$NON-NLS-2$
+                }
+            }
+        }
+        
+        if(unusedRightEntityTypes != null && unusedRightEntityTypes.size() > 0){
+            for(ComplexTypeMetadata rightType : unusedRightEntityTypes){
+                // Added Right type element (only exist in right, not in left).
+                diffResults.addChanges.add(new AddChange(rightType));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("[ADDED] " + rightType + " was added.");  //$NON-NLS-1$//$NON-NLS-2$
+                }
+            }
+        }
+    }
+    
+    @SuppressWarnings("unused")
+    private static void compareTypesChange(MetadataRepository left, MetadataRepository right, DiffResults diffResults){
+        List<TypeMetadata> unusedLeftTypes = new ArrayList<TypeMetadata>(); 
+        List<TypeMetadata> unusedRightTypes = new ArrayList<TypeMetadata>();
+        Set<TypeMetadata> complexTypeSet = new HashSet<TypeMetadata>();
+        complexTypeSet.addAll(left.getNonInstantiableTypes());
+        complexTypeSet.addAll(right.getNonInstantiableTypes());
+        
+        for(TypeMetadata ctm : complexTypeSet){
+            if (left.getNonInstantiableType(ctm.getNamespace(), ctm.getName()) != null && right.getNonInstantiableType(ctm.getNamespace(), ctm.getName()) == null) {
+                if(left.getNonInstantiableType(ctm.getNamespace(), ctm.getName()) instanceof ComplexTypeMetadata && MetadataUtils.countEntityUsageCount((ComplexTypeMetadata)left.getNonInstantiableType(ctm.getNamespace(), ctm.getName())) > 0){
+                    unusedLeftTypes.add(ctm);
+                }
+            } else if (left.getNonInstantiableType(ctm.getNamespace(), ctm.getName()) == null && right.getNonInstantiableType(ctm.getNamespace(), ctm.getName()) != null){
+                if(right.getNonInstantiableType(ctm.getNamespace(), ctm.getName()) instanceof ComplexTypeMetadata && MetadataUtils.countEntityUsageCount((ComplexTypeMetadata)right.getNonInstantiableType(ctm.getNamespace(), ctm.getName())) > 0){
+                    unusedRightTypes.add(ctm);
+                }
+            }
+        }
+        
+        if(unusedLeftTypes != null && unusedLeftTypes.size() > 0){
+            for(TypeMetadata tm : unusedLeftTypes){
+                // Right type does not exist
+                diffResults.removeChanges.add(new RemoveChange(tm));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("[REMOVED] Type " + tm + " no longer exist.");  //$NON-NLS-1$//$NON-NLS-2$
+                }
+            }
+        }
+        
+        if(unusedRightTypes != null && unusedRightTypes.size() > 0){
+            for(TypeMetadata tm : unusedRightTypes){
+                // Added Right type element (only exist in right, not in left).
+                diffResults.addChanges.add(new AddChange(tm));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("[ADDED] " + tm + " was added.");  //$NON-NLS-1$//$NON-NLS-2$
+                }
+            }
         }
     }
 
