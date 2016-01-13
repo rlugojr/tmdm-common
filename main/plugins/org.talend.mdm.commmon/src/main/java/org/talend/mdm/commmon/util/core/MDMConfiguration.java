@@ -13,10 +13,11 @@
 package org.talend.mdm.commmon.util.core;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+import org.apache.commons.configuration.ConfigurationConverter;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 
 /**
@@ -32,6 +33,10 @@ public final class MDMConfiguration {
      * @see com.amalto.core.save.generator.AutoIncrementGenerator
      */
     private static final String SYSTEM_CLUSTER = "system.cluster"; //$NON-NLS-1$
+
+    private static final String ADMIN_PASSWORD = "admin.password"; //$NON-NLS-1$
+
+    private static final String TECHNICAL_PASSWORD = "technical.password"; //$NON-NLS-1$
 
     private static final Logger logger = Logger.getLogger(MDMConfiguration.class);
 
@@ -88,45 +93,36 @@ public final class MDMConfiguration {
 
         File file = new File(location);
         if (file.exists()) {
-            logger.info("MDM Configuration: found in '" + file.getAbsolutePath() + "'."); //$NON-NLS-1$ //$NON-NLS-2$
-            FileInputStream in = null;
+            logger.info("MDM Configuration: found in '" + file.getAbsolutePath() + "'."); //$NON-NLS-1$ //$NON-NLS-2$           
             try {
-                in = new FileInputStream(file);                
-                properties.load(in);
-                String adminPassword = properties.getProperty("admin.password"); //$NON-NLS-1$
-                String tPassword = properties.getProperty("technical.password"); //$NON-NLS-1$
+                PropertiesConfiguration config = new PropertiesConfiguration();
+                config.setDelimiterParsingDisabled(true);
+                config.load(file);
+                String adminPassword = (String) config.getProperty(ADMIN_PASSWORD);
+                String tPassword = (String) config.getProperty(TECHNICAL_PASSWORD);
                 boolean isUpdated = false;
                 if (adminPassword != null && !adminPassword.endsWith(Crypt.ENCRYPT)) {
                     adminPassword = Crypt.encrypt(adminPassword);
-                    properties.setProperty("admin.password", adminPassword); //$NON-NLS-1$
+                    config.setProperty(ADMIN_PASSWORD, adminPassword);
                     isUpdated = true;
                 }
                 if (tPassword != null && !tPassword.endsWith(Crypt.ENCRYPT)) {
                     tPassword = Crypt.encrypt(tPassword);
-                    properties.setProperty("technical.password", tPassword); //$NON-NLS-1$
+                    config.setProperty(TECHNICAL_PASSWORD, tPassword);
                     isUpdated = true;
                 }
                 if (isUpdated) {
-                    save();
+                    config.save(file);
                 }
-                properties.setProperty("admin.password", Crypt.decrypt(adminPassword)); //$NON-NLS-1$
-                properties.setProperty("technical.password", Crypt.decrypt(tPassword)); //$NON-NLS-1$                
+                config.setProperty(ADMIN_PASSWORD, Crypt.decrypt(adminPassword));
+                config.setProperty(TECHNICAL_PASSWORD, Crypt.decrypt(tPassword));
+                properties = ConfigurationConverter.getProperties(config);
             } catch (Exception e) {
                 if (!ignoreIfNotFound) {
                     throw new IllegalStateException("Unable to load MDM configuration from '" //$NON-NLS-1$
                             + file.getAbsolutePath() + "'", e); //$NON-NLS-1$
                 }
                 logger.warn("Unable to load MDM configuration from '" + file.getAbsolutePath() + "'", e); //$NON-NLS-1$ //$NON-NLS-2$
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (Exception e) {
-                        if (logger.isDebugEnabled()) {
-                            logger.error(e.getMessage(), e);
-                        }
-                    }
-                }
             }
         } else {
             if (!ignoreIfNotFound) {
