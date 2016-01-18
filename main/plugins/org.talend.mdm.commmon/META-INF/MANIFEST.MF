@@ -6,7 +6,9 @@ Bundle-Version: 6.2.0.qualifier
 Require-Bundle: org.eclipse.xsd,
  org.apache.commons.lang,
  org.apache.commons.collections,
- org.apache.commons.jxpath
+ org.apache.commons.jxpath,
+ org.apache.commons.configuration,
+ org.talend.utils 
 Import-Package: org.apache.log4j
 Bundle-ActivationPolicy: lazy
 Export-Package: org.talend.mdm.commmon.metadata,
