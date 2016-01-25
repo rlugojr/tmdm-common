@@ -676,7 +676,7 @@ public class MetadataRepository implements MetadataVisitable, XSDVisitor, Serial
                 referenceField.setData(XSD_LINE_NUMBER, XSDParser.getStartLine(element.getElement()));
                 referenceField.setData(XSD_COLUMN_NUMBER, XSDParser.getStartColumn(element.getElement()));
                 referenceField.setData(XSD_DOM_ELEMENT, element.getElement());
-                setLocalizedNames(referencedField, state.getLocaleToLabel());
+                setLocalizedNames(referenceField, state.getLocaleToLabel());
                 return referenceField;
             }
             if (content != null) {
