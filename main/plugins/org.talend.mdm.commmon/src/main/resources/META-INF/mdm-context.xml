@@ -7,9 +7,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
     <!-- Properties -->
     <context:property-placeholder ignore-unresolvable="true"/>
-
+    
+    <bean id="encryptMDMConf" class="org.talend.mdm.commmon.util.core.EncryptUtil" factory-method="encrypt">
+        <constructor-arg value="${mdm.root}/conf/" />
+    </bean>
+    
     <!-- MDM Configuration -->
-    <bean id="mdmConfiguration" class="org.talend.mdm.commmon.util.core.MDMConfiguration" factory-method="createConfiguration">
+    <bean id="mdmConfiguration" class="org.talend.mdm.commmon.util.core.MDMConfiguration" factory-method="createConfiguration" depends-on="encryptMDMConf">
         <constructor-arg value="${mdm.root}/conf/mdm.conf" />
         <constructor-arg value="#{ T(java.lang.Boolean).getBoolean('mdm.root.ignoreIfNotFound') }"/>
     </bean>

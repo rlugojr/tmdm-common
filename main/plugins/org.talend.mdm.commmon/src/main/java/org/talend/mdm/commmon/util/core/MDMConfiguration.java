@@ -34,9 +34,9 @@ public final class MDMConfiguration {
      */
     private static final String SYSTEM_CLUSTER = "system.cluster"; //$NON-NLS-1$
 
-    private static final String ADMIN_PASSWORD = "admin.password"; //$NON-NLS-1$
+    public static final String ADMIN_PASSWORD = "admin.password"; //$NON-NLS-1$
 
-    private static final String TECHNICAL_PASSWORD = "technical.password"; //$NON-NLS-1$
+    public static final String TECHNICAL_PASSWORD = "technical.password"; //$NON-NLS-1$
 
     private static final Logger logger = Logger.getLogger(MDMConfiguration.class);
 
@@ -98,24 +98,9 @@ public final class MDMConfiguration {
                 PropertiesConfiguration config = new PropertiesConfiguration();
                 config.setDelimiterParsingDisabled(true);
                 config.load(file);
-                String adminPassword = (String) config.getProperty(ADMIN_PASSWORD);
-                String tPassword = (String) config.getProperty(TECHNICAL_PASSWORD);
-                boolean isUpdated = false;
-                if (adminPassword != null && !adminPassword.endsWith(Crypt.ENCRYPT)) {
-                    adminPassword = Crypt.encrypt(adminPassword);
-                    config.setProperty(ADMIN_PASSWORD, adminPassword);
-                    isUpdated = true;
-                }
-                if (tPassword != null && !tPassword.endsWith(Crypt.ENCRYPT)) {
-                    tPassword = Crypt.encrypt(tPassword);
-                    config.setProperty(TECHNICAL_PASSWORD, tPassword);
-                    isUpdated = true;
-                }
-                if (isUpdated) {
-                    config.save(file);
-                }
-                config.setProperty(ADMIN_PASSWORD, Crypt.decrypt(adminPassword));
-                config.setProperty(TECHNICAL_PASSWORD, Crypt.decrypt(tPassword));
+                // Decrypt the passwords in mdm.conf
+                config.setProperty(ADMIN_PASSWORD, Crypt.decrypt(config.getString(ADMIN_PASSWORD)));
+                config.setProperty(TECHNICAL_PASSWORD, Crypt.decrypt(config.getString(TECHNICAL_PASSWORD)));
                 properties = ConfigurationConverter.getProperties(config);
             } catch (Exception e) {
                 if (!ignoreIfNotFound) {
