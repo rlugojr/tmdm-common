@@ -32,7 +32,7 @@ public class EncryptUtil {
 
     public static String TDSC_DATABASE_PASSWORD = "tdsc.database.password"; //$NON-NLS-1$
 
-    private static String dB_DEFAULT_DATASOURCE = "db.default.datasource"; //$NON-NLS-1$
+    private static String DB_DEFAULT_DATASOURCE = "db.default.datasource"; //$NON-NLS-1$
 
     private static boolean updated = false;
 
@@ -65,8 +65,8 @@ public class EncryptUtil {
                 config.setDelimiterParsingDisabled(true);
                 config.load(file);
                 if (file.getName().equals("mdm.conf")) { //$NON-NLS-1$
-                    dataSourceName = config.getString(dB_DEFAULT_DATASOURCE) == null ? StringUtils.EMPTY : config
-                            .getString(dB_DEFAULT_DATASOURCE);
+                    dataSourceName = config.getString(DB_DEFAULT_DATASOURCE) == null ? StringUtils.EMPTY : config
+                            .getString(DB_DEFAULT_DATASOURCE);
                 }
                 updated = false;
                 for (String property : properties) {
@@ -104,12 +104,12 @@ public class EncryptUtil {
                 updated = false;
                 if (index >= 0) {
                     HierarchicalConfiguration sub = config.configurationAt("datasource(" + index + ")"); //$NON-NLS-1$//$NON-NLS-2$
-                    encrypyByXpath(sub, "master.rdbms-configuration.connection-password"); //$NON-NLS-1$
-                    encrypyByXpath(sub, "master.rdbms-configuration.init.connection-password"); //$NON-NLS-1$
-                    encrypyByXpath(sub, "staging.rdbms-configuration.connection-password"); //$NON-NLS-1$
-                    encrypyByXpath(sub, "staging.rdbms-configuration.init.connection-password"); //$NON-NLS-1$
-                    encrypyByXpath(sub, "system.rdbms-configuration.connection-password"); //$NON-NLS-1$
-                    encrypyByXpath(sub, "system.rdbms-configuration.init.connection-password"); //$NON-NLS-1$
+                    encryptByXpath(sub, "master.rdbms-configuration.connection-password"); //$NON-NLS-1$
+                    encryptByXpath(sub, "master.rdbms-configuration.init.connection-password"); //$NON-NLS-1$
+                    encryptByXpath(sub, "staging.rdbms-configuration.connection-password"); //$NON-NLS-1$
+                    encryptByXpath(sub, "staging.rdbms-configuration.init.connection-password"); //$NON-NLS-1$
+                    encryptByXpath(sub, "system.rdbms-configuration.connection-password"); //$NON-NLS-1$
+                    encryptByXpath(sub, "system.rdbms-configuration.init.connection-password"); //$NON-NLS-1$
                 }
                 if (updated) {
                     config.save(file);
@@ -120,7 +120,7 @@ public class EncryptUtil {
         }
     }
 
-    private static void encrypyByXpath(HierarchicalConfiguration config, String xpath) throws Exception {
+    private static void encryptByXpath(HierarchicalConfiguration config, String xpath) throws Exception {
         String password = config.getString(xpath);
         if (password != null && !password.isEmpty() && !password.endsWith(Crypt.ENCRYPT)) {
             config.setProperty(xpath, Crypt.encrypt(password));
