@@ -15,10 +15,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * Default visitor for data model classes in package org.talend.mdm.commmon.metadata.
  */
 public class DefaultMetadataVisitor<T> implements MetadataVisitor<T> {
+
+    private static final Logger LOGGER = Logger.getLogger(DefaultMetadataVisitor.class);
+
+    protected static boolean isDatabaseMandatory(FieldMetadata field, TypeMetadata declaringType) {
+        boolean isDatabaseMandatory = field.isMandatory() && declaringType.isInstantiable();
+        if (field.isMandatory() && !isDatabaseMandatory) {
+            LOGGER.warn("Field '" + field.getName() + "' is mandatory but constraint cannot be enforced in database schema."); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        return isDatabaseMandatory;
+    }
 
     /**
      * Visit all types located in <code>repository</code>.
