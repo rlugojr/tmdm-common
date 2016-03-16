@@ -68,7 +68,7 @@ class XSDAttributeValidationRule implements ValidationRule {
 
     @Override
     public boolean perform(ValidationHandler handler) {
-        Element element = type.getData(MetadataRepository.XSD_DOM_ELEMENT);
+        Element element = type.<Element> getData(MetadataRepository.XSD_DOM_ELEMENT);
         if (element == null) {
             return true; // No need to check anything if no DOM element
         }

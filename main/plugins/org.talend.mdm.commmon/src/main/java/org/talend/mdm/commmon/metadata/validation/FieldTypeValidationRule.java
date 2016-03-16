@@ -32,9 +32,9 @@ class FieldTypeValidationRule implements ValidationRule {
         TypeMetadata currentType = field.getType();
         if (currentType == null) {
             handler.error(field, "Type '" + field.getType().getName() + "' does not exist",
-                    (Element) field.getData(MetadataRepository.XSD_DOM_ELEMENT),
-                    (Integer) field.getData(MetadataRepository.XSD_LINE_NUMBER),
-                    (Integer) field.getData(MetadataRepository.XSD_COLUMN_NUMBER), ValidationError.TYPE_DOES_NOT_EXIST);
+                    field.<Element> getData(MetadataRepository.XSD_DOM_ELEMENT),
+                    field.<Integer> getData(MetadataRepository.XSD_LINE_NUMBER),
+                    field.<Integer> getData(MetadataRepository.XSD_COLUMN_NUMBER), ValidationError.TYPE_DOES_NOT_EXIST);
             return false;
         }
         if (!XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(currentType.getNamespace())) {

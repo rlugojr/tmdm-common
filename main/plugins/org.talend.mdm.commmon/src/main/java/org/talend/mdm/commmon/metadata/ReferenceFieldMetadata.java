@@ -174,7 +174,7 @@ public class ReferenceFieldMetadata extends MetadataExtensions implements FieldM
     @Override
     public void validate(ValidationHandler handler) {
         // When referenced field has errors, client expects the reference field as error iso. the referenced field.
-        Element element = this.getData(MetadataRepository.XSD_DOM_ELEMENT);
+        Element element = this.<Element> getData(MetadataRepository.XSD_DOM_ELEMENT);
         Integer lineNumber = this.<Integer>getData(MetadataRepository.XSD_LINE_NUMBER);
         Integer columnNumber = this.<Integer>getData(MetadataRepository.XSD_COLUMN_NUMBER);
         LocationOverride override = new LocationOverride(this, handler, element, lineNumber, columnNumber);
