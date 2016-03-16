@@ -152,8 +152,8 @@ public class SoftIdFieldRef implements FieldMetadata {
             handler.error(this,
                     "Type '" + type.getName() + "' does not own field '" + fieldName + "'.",
                     type.<Element> getData(MetadataRepository.XSD_DOM_ELEMENT),
-                    type.<String> getData(MetadataRepository.XSD_LINE_NUMBER),
-                    type.<String> getData(MetadataRepository.XSD_COLUMN_NUMBER),
+                    type.<Integer> getData(MetadataRepository.XSD_LINE_NUMBER),
+                    type.<Integer> getData(MetadataRepository.XSD_COLUMN_NUMBER),
                     ValidationError.TYPE_DOES_NOT_OWN_FIELD);
             return;
         }
