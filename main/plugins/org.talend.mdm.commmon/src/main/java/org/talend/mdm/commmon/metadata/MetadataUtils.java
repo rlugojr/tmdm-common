@@ -477,7 +477,7 @@ public class MetadataUtils {
                             // Containing type might be null if incoming reference is in the reusable type definition
                             // (but we only care about the entity relations, so use of the reusable types
                             // in entities).
-                            if (containingType != null && containingType != type) {
+                            if (containingType != null && !containingType.equals(type)) {
                                 int currentDependency = getId(containingType, types);
                                 if (hasIncomingEdges(dependencyGraph[currentDependency])) {
                                     dependencyGraph[currentLineNumber][currentDependency]--;
