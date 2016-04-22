@@ -140,7 +140,7 @@
                                 <goal>compile</goal>
                             </goals>
                             <configuration>
-                                <extraJvmArgs>-Xmx512m -XX:-ReduceInitialCardMarks</extraJvmArgs>
+                                <extraJvmArgs>-Xmx1024m -XX:-ReduceInitialCardMarks</extraJvmArgs>
                                 <localWorkers>${gwt.localWorkers}</localWorkers>
                                 <deploy>${project.build.directory}/gwt-deploy</deploy>
                                 <logLevel>INFO</logLevel>
