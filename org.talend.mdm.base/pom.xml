@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.talend.mdm</groupId>
     <artifactId>mdm-base</artifactId>
-    <version>6.2.0-SNAPSHOT</version>
+    <version>6.2.0-NOTUSE</version>
     <packaging>pom</packaging>
     <name>org.talend.mdm.base</name>
     <url>http://www.talend.com</url>
@@ -33,7 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <trimStackTrace>false</trimStackTrace>
 
-        <product.description></product.description>
+        <product.description />
         <mdm.build.dir>${project.basedir}/target</mdm.build.dir>
         <mdm.build.version>${product.version}${product.qualifier}-${product.timestamp}</mdm.build.version>
         <mdm.build.web.dir>${mdm.build.dir}/${project.artifactId}-${project.version}</mdm.build.web.dir>
@@ -330,7 +329,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -1295,10 +1294,8 @@
                                     <exportAntProperties>true</exportAntProperties>
                                     <target>
                                         <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
-                                        <propertyregex property="product.version.short" input="${product.version}"
-                                            regexp="\." replace="" global="true" casesensitive="false" override="true" />
-                                        <property name="mdm.deploy.dir"
-                                            value="${storage}/${product.build.id}/${storage.dir}/V${product.version}${revision.filename}/${storage.dir}_${product.version.short}" />
+                                        <propertyregex property="product.version.short" input="${product.version}" regexp="\." replace="" global="true" casesensitive="false" override="true" />
+                                        <property name="mdm.deploy.dir" value="${storage}/${product.build.id}/${storage.dir}/V${product.version}${revision.filename}/${storage.dir}_${product.version.short}" />
                                         <property name="tdsc.deploy.dir" value="${storage}/${product.build.id}/datastewardship" />
                                         <echo>mdm.deploy.dir ${mdm.deploy.dir}</echo>
                                     </target>
