@@ -38,8 +38,6 @@ public final class MDMConfiguration {
 
     public static final String TECHNICAL_PASSWORD = "technical.password"; //$NON-NLS-1$
 
-    public static String ACTIVEMP_PASSWORD = "mdm.routing.engine.broker.password"; //$NON-NLS-1$
-
     private static final Logger logger = Logger.getLogger(MDMConfiguration.class);
 
     private static MDMConfiguration instance;
@@ -103,9 +101,6 @@ public final class MDMConfiguration {
                 // Decrypt the passwords in mdm.conf
                 config.setProperty(ADMIN_PASSWORD, Crypt.decrypt(config.getString(ADMIN_PASSWORD)));
                 config.setProperty(TECHNICAL_PASSWORD, Crypt.decrypt(config.getString(TECHNICAL_PASSWORD)));
-                if (config.getString(ACTIVEMP_PASSWORD) != null) {
-                    config.setProperty(ACTIVEMP_PASSWORD, Crypt.decrypt(config.getString(ACTIVEMP_PASSWORD)));
-                }
                 properties = ConfigurationConverter.getProperties(config);
             } catch (Exception e) {
                 if (!ignoreIfNotFound) {
