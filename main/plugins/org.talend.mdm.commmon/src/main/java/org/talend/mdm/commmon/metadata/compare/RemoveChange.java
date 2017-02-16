@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 
 import org.talend.mdm.commmon.metadata.*;
 
-class RemoveChange extends Change {
+public class RemoveChange extends Change {
 
     private ResourceBundle bundle;
 
