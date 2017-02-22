@@ -58,12 +58,7 @@ public class HibernateStorageImpactAnalyzer implements ImpactAnalyzer {
             if (element instanceof ComplexTypeMetadata) {
                 impactSort.get(Impact.MEDIUM).add(removeAction);
             } else if (element instanceof FieldMetadata) {
-                FieldMetadata field = (FieldMetadata) removeAction.getElement();
-                if (field.isMandatory()) {
-                    impactSort.get(Impact.HIGH).add(removeAction);
-                } else {
-                    impactSort.get(Impact.MEDIUM).add(removeAction);
-                }
+                impactSort.get(Impact.MEDIUM).add(removeAction);
             } else {
                 throw new NotImplementedException();
             }
